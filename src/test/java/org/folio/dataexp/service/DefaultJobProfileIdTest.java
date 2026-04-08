@@ -4,15 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
 import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
 import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.ErrorCode.ERROR_DUPLICATED_IDS;
+import static org.folio.dataexp.util.ErrorCode.ERROR_INVALID_CQL_SYNTAX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -20,19 +25,30 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.SneakyThrows;
 import org.folio.dataexp.TestMate;
+import org.folio.dataexp.client.SearchClient;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.folio.dataexp.domain.dto.IdsJob;
+import org.folio.dataexp.domain.dto.IdsJobPayload;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.ResourceIds;
 import org.folio.dataexp.domain.dto.User;
+import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
@@ -44,7 +60,9 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
+import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.scope.FolioExecutionScopeExecutionContextManager;
 import org.junit.jupiter.api.Test;
@@ -52,6 +70,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -89,6 +108,16 @@ class DefaultJobProfileIdTest {
   @Mock private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   @Mock private MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   @Mock private ExportIdEntityRepository exportIdEntityRepository;
+
+  @Captor private ArgumentCaptor<List<ExportIdEntity>> batchCaptor;
+
+  @Mock private SearchClient searchClient;
+
+  @Mock private InsertExportIdService insertExportIdService;
+
+  @Mock private ErrorLogService errorLogService;
+
+  @Mock private FolioS3Client s3Client;
 
   @ParameterizedTest
   @EnumSource(value = ExportAllRequest.IdTypeEnum.class)
@@ -276,6 +305,293 @@ class DefaultJobProfileIdTest {
     verify(jobExecutionService, never()).getById(any(UUID.class));
   }
 
+  @Test
+  @TestMate(name = "TestMate-e78a0fbbddefda7f93b2e1922fb68c46")
+  void testReadFileWhenUploadFormatIsCsvShouldProcessIdsAndSaveInBatches() {
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var jobExecution =
+        new JobExecution()
+            .id(jobExecutionId)
+            .progress(new JobExecutionProgress().total(0).readIds(0).exported(0).failed(0));
+    var uuids =
+        IntStream.range(0, 1005)
+            .mapToObj(i -> UUID.nameUUIDFromBytes(String.valueOf(i).getBytes()).toString())
+            .collect(Collectors.toList());
+    // Keep track of clean UUIDs for verification
+    var expectedUuid0 = uuids.get(0);
+    var expectedUuid1 = uuids.get(1);
+    // Add dirty data to test cleaning logic
+    uuids.set(0, "\"" + expectedUuid0 + "\""); // Wrapped in quotes
+    uuids.set(1, "\uFEFF" + expectedUuid1); // Starts with BOM
+    var csvContent = String.join(System.lineSeparator(), uuids);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
+    // Two passes: one for counting lines, one for processing
+    when(s3Client.read(anyString()))
+        .thenReturn(new ByteArrayInputStream(csvContent.getBytes(StandardCharsets.UTF_8)))
+        .thenReturn(new ByteArrayInputStream(csvContent.getBytes(StandardCharsets.UTF_8)));
+    when(exportIdEntityRepository.countByJobExecutionId(jobExecutionId)).thenReturn(1005L);
+    // Instantiate the real processor using existing mocks to execute the actual logic
+    var realInputFileProcessor =
+        new InputFileProcessor(
+            exportIdEntityRepository,
+            s3Client,
+            searchClient,
+            errorLogService,
+            jobExecutionService,
+            insertExportIdService);
+    // Use doAnswer to capture copies of the batch because the implementation clears the list
+    // reference
+    List<List<ExportIdEntity>> capturedBatches = new java.util.ArrayList<>();
+    doAnswer(
+            invocation -> {
+              List<ExportIdEntity> batchArg = invocation.getArgument(0);
+              capturedBatches.add(new java.util.ArrayList<>(batchArg));
+              return null;
+            })
+        .when(insertExportIdService)
+        .saveBatch(any());
+    var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var fileName = "test.csv";
+    var fileDefinition =
+        new FileDefinition()
+            .id(fileDefinitionId)
+            .jobExecutionId(jobExecutionId)
+            .fileName(fileName)
+            .uploadFormat(FileDefinition.UploadFormatEnum.CSV);
+    var commonExportStatistic = new CommonExportStatistic();
+    // When
+    realInputFileProcessor.readFile(
+        fileDefinition, commonExportStatistic, ExportRequest.IdTypeEnum.INSTANCE);
+    // Then
+    assertThat(jobExecution.getProgress().getTotal()).isEqualTo(1005);
+    assertThat(jobExecution.getProgress().getReadIds()).isEqualTo(1005);
+    assertThat(commonExportStatistic.isFailedToReadInputFile()).isFalse();
+    assertThat(commonExportStatistic.getInvalidUuidFormat()).isEmpty();
+    assertThat(commonExportStatistic.getDuplicatedUuidAmount()).isZero();
+
+    assertThat(capturedBatches).hasSize(2);
+    assertThat(capturedBatches.get(0)).hasSize(1000);
+    assertThat(capturedBatches.get(1)).hasSize(5);
+
+    // Verify cleaning logic: check first two entities in first batch
+    var firstBatch = capturedBatches.get(0);
+    assertThat(firstBatch.get(0).getInstanceId().toString()).hasToString(expectedUuid0);
+    assertThat(firstBatch.get(1).getInstanceId().toString()).hasToString(expectedUuid1);
+
+    // 1 (initial total) + 1 (first batch of 1000) + 1 (final remainder)
+    verify(jobExecutionService, times(3)).save(isA(JobExecution.class));
+    verify(errorLogService, times(0)).saveGeneralErrorWithMessageValues(any(), any(), any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-7363dc5f2faf8525b6352ef92c3cbbe6")
+  void testReadFileWhenCsvHasDuplicatesShouldLogErrorsAndIncrementStats() {
+    // Given
+    var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var instanceIdA = UUID.fromString("00000000-0000-0000-0000-00000000000A");
+    var instanceIdB = UUID.fromString("00000000-0000-0000-0000-00000000000B");
+    var jobExecution =
+        new JobExecution()
+            .id(jobExecutionId)
+            .progress(new JobExecutionProgress().total(0).readIds(0).exported(0).failed(0));
+    var csvContent = String.format("%s%n%s%n%s", instanceIdA, instanceIdA, instanceIdB);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
+    // Two passes: one for counting lines, one for processing
+    when(s3Client.read(anyString()))
+        .thenReturn(new ByteArrayInputStream(csvContent.getBytes(StandardCharsets.UTF_8)))
+        .thenReturn(new ByteArrayInputStream(csvContent.getBytes(StandardCharsets.UTF_8)));
+    // Stub the repository to return 2 unique IDs found in the DB after processing
+    when(exportIdEntityRepository.countByJobExecutionId(jobExecutionId)).thenReturn(2L);
+    // Use doAnswer to capture a copy of the batch because the implementation clears the list
+    // reference
+    List<ExportIdEntity> capturedEntities = new java.util.ArrayList<>();
+    doAnswer(
+            invocation -> {
+              List<ExportIdEntity> batchArg = invocation.getArgument(0);
+              capturedEntities.addAll(new java.util.ArrayList<>(batchArg));
+              return null;
+            })
+        .when(insertExportIdService)
+        .saveBatch(any());
+    var inputFileProcessorInternal =
+        new org.folio.dataexp.service.InputFileProcessor(
+            exportIdEntityRepository,
+            s3Client,
+            searchClient,
+            errorLogService,
+            jobExecutionService,
+            insertExportIdService);
+    var commonExportStatistic = new CommonExportStatistic();
+    var fileDefinition =
+        new FileDefinition()
+            .id(fileDefinitionId)
+            .jobExecutionId(jobExecutionId)
+            .fileName("duplicates.csv")
+            .uploadFormat(FileDefinition.UploadFormatEnum.CSV);
+    // When
+    inputFileProcessorInternal.readFile(
+        fileDefinition, commonExportStatistic, ExportRequest.IdTypeEnum.INSTANCE);
+    // Then
+    assertThat(jobExecution.getProgress().getTotal()).isEqualTo(3);
+    assertThat(jobExecution.getProgress().getReadIds()).isEqualTo(3);
+    assertThat(commonExportStatistic.getDuplicatedUuidAmount()).isEqualTo(1);
+    assertThat(commonExportStatistic.isFailedToReadInputFile()).isFalse();
+    assertThat(capturedEntities).hasSize(2);
+    assertThat(capturedEntities.stream().map(ExportIdEntity::getInstanceId).toList())
+        .containsExactlyInAnyOrder(instanceIdA, instanceIdB);
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ERROR_DUPLICATED_IDS.getCode(), List.of(instanceIdA.toString(), "2"), jobExecutionId);
+    verify(jobExecutionService, atLeastOnce()).save(isA(JobExecution.class));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-1e539259a7e54e170459af439c9c3dda")
+  @SneakyThrows
+  void testReadFileWhenUploadFormatIsCqlShouldSubmitSearchJobAndProcessResults() {
+    // Given
+    var instanceId = UUID.fromString("00000000-0000-0000-0000-00000000000A");
+
+    var resourceIds = mock(ResourceIds.class);
+    // Use the actual generated nested class type to avoid compilation errors
+    var mockResourceId = mock(org.folio.dataexp.domain.dto.ResourceIds.Id.class);
+    when(mockResourceId.getId()).thenReturn(instanceId);
+
+    when(resourceIds.getTotalRecords()).thenReturn(1);
+    when(resourceIds.getIds()).thenReturn(List.of(mockResourceId));
+
+    inputFileProcessor =
+        new InputFileProcessor(
+            exportIdEntityRepository,
+            s3Client,
+            searchClient,
+            errorLogService,
+            jobExecutionService,
+            insertExportIdService);
+
+    Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
+    waitField.setAccessible(true);
+    waitField.set(inputFileProcessor, 20);
+
+    var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var searchJobId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    var fileName = "query.cql";
+    var cqlQuery = "cql.allRecords=1";
+    var jobExecution =
+        new JobExecution()
+            .id(jobExecutionId)
+            .progress(new JobExecutionProgress().total(0).readIds(0).exported(0).failed(0));
+    var idsJobInProgress = new IdsJob().withId(searchJobId).withStatus(IdsJob.Status.IN_PROGRESS);
+    var idsJobCompleted = new IdsJob().withId(searchJobId).withStatus(IdsJob.Status.COMPLETED);
+
+    when(s3Client.read(anyString()))
+        .thenReturn(new ByteArrayInputStream(cqlQuery.getBytes(StandardCharsets.UTF_8)));
+    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(idsJobInProgress);
+    when(searchClient.getJobStatus(searchJobId.toString()))
+        .thenReturn(idsJobInProgress)
+        .thenReturn(idsJobCompleted);
+    when(searchClient.getResourceIds(searchJobId.toString())).thenReturn(resourceIds);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
+    var fileDefinition =
+        new FileDefinition()
+            .id(fileDefinitionId)
+            .jobExecutionId(jobExecutionId)
+            .fileName(fileName)
+            .uploadFormat(FileDefinition.UploadFormatEnum.CQL);
+    var commonExportStatistic = new CommonExportStatistic();
+
+    // When
+    inputFileProcessor.readFile(
+        fileDefinition, commonExportStatistic, ExportRequest.IdTypeEnum.INSTANCE);
+
+    // Then
+    var payloadCaptor = ArgumentCaptor.forClass(IdsJobPayload.class);
+    verify(searchClient).submitIdsJob(payloadCaptor.capture());
+    assertThat(payloadCaptor.getValue().getQuery()).isEqualTo(cqlQuery);
+    assertThat(payloadCaptor.getValue().getEntityType())
+        .isEqualTo(IdsJobPayload.EntityType.INSTANCE);
+    verify(searchClient, atLeast(2)).getJobStatus(searchJobId.toString());
+    verify(searchClient).getResourceIds(searchJobId.toString());
+
+    verify(insertExportIdService).saveBatch(batchCaptor.capture());
+    List<ExportIdEntity> capturedBatch = batchCaptor.getValue();
+    assertThat(capturedBatch).hasSize(1);
+    assertThat(capturedBatch.getFirst().getInstanceId()).isEqualTo(instanceId);
+    assertThat(capturedBatch.getFirst().getJobExecutionId()).isEqualTo(jobExecutionId);
+    assertThat(jobExecution.getProgress().getTotal()).isEqualTo(1);
+    assertThat(jobExecution.getProgress().getReadIds()).isEqualTo(1);
+    verify(jobExecutionService, atLeast(1)).save(jobExecution);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-7bec775a1cb3c9e884a6d907f10dbdec")
+  @SneakyThrows
+  void testReadFileWhenCqlSearchJobFailsShouldLogError() {
+    // Given
+    var cqlQuery = "cql.allRecords=1";
+
+    // Use the real InputFileProcessor to execute the actual logic of readCqlFile
+    var realInputFileProcessor =
+        new InputFileProcessor(
+            exportIdEntityRepository,
+            s3Client,
+            searchClient,
+            errorLogService,
+            jobExecutionService,
+            insertExportIdService);
+
+    // Set the wait time to a value strictly greater than SEARCH_POLL_INTERVAL_SECONDS (5L)
+    // Awaitility requires timeout > poll interval to avoid IllegalArgumentException
+    Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
+    waitField.setAccessible(true);
+    waitField.set(realInputFileProcessor, 10);
+
+    // Mocking dependencies
+    when(s3Client.read(anyString()))
+        .thenReturn(new ByteArrayInputStream(cqlQuery.getBytes(StandardCharsets.UTF_8)));
+
+    // Submit job returns the job info
+    var searchJobId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    var idsJobInitial = new IdsJob().withId(searchJobId).withStatus(IdsJob.Status.IN_PROGRESS);
+    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(idsJobInitial);
+
+    // Mock getJobStatus to return ERROR.
+    // The implementation calls it in until() and then again to check the final status.
+    var idsJobError = new IdsJob().withId(searchJobId).withStatus(IdsJob.Status.ERROR);
+    when(searchClient.getJobStatus(searchJobId.toString())).thenReturn(idsJobError);
+
+    var commonExportStatistic = new CommonExportStatistic();
+    var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var fileName = "query.cql";
+    var fileDefinition =
+        new FileDefinition()
+            .id(fileDefinitionId)
+            .jobExecutionId(jobExecutionId)
+            .fileName(fileName)
+            .uploadFormat(FileDefinition.UploadFormatEnum.CQL);
+
+    // When
+    realInputFileProcessor.readFile(
+        fileDefinition, commonExportStatistic, ExportRequest.IdTypeEnum.INSTANCE);
+
+    // Then
+    // Verify that the error was logged with the correct parameters
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ERROR_INVALID_CQL_SYNTAX.getCode(),
+            Collections.singletonList(fileName),
+            jobExecutionId);
+
+    // Verify search client interactions
+    verify(searchClient, atLeastOnce()).getJobStatus(searchJobId.toString());
+    verify(searchClient, never()).getResourceIds(anyString());
+    verify(insertExportIdService, never()).saveBatch(any());
+  }
+
   private String defaultJobProfileIdFor(ExportAllRequest.IdTypeEnum idType) {
     return switch (idType) {
       case HOLDING -> DEFAULT_HOLDINGS_JOB_PROFILE_ID;
@@ -389,24 +705,10 @@ class DefaultJobProfileIdTest {
     }
   }
 
-  private static class Scenario {
-    final FileDefinitionEntity fileDefinitionEntity;
-    final JobProfileEntity jobProfileEntity;
-    final MappingProfileEntity mappingProfileEntity;
-    final JobExecution jobExecution;
-    final User user;
-
-    Scenario(
-        FileDefinitionEntity fileDefinitionEntity,
-        JobProfileEntity jobProfileEntity,
-        MappingProfileEntity mappingProfileEntity,
-        JobExecution jobExecution,
-        User user) {
-      this.fileDefinitionEntity = fileDefinitionEntity;
-      this.jobProfileEntity = jobProfileEntity;
-      this.mappingProfileEntity = mappingProfileEntity;
-      this.jobExecution = jobExecution;
-      this.user = user;
-    }
-  }
+  private record Scenario(
+      FileDefinitionEntity fileDefinitionEntity,
+      JobProfileEntity jobProfileEntity,
+      MappingProfileEntity mappingProfileEntity,
+      JobExecution jobExecution,
+      User user) {}
 }
