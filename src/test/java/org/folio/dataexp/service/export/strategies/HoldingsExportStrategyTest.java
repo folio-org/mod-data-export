@@ -61,6 +61,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import org.folio.dataexp.service.export.strategies.GeneratedMarcResult;
+import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.processor.rule.Rule;
+import java.util.Collections;
+import java.util.HashMap;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.mockito.ArgumentMatchers.anyString;
+import java.util.LinkedHashMap;
+import org.folio.dataexp.util.ErrorCode;
+import org.mockito.ArgumentCaptor;
+import java.util.Collection;
 
 @ExtendWith(MockitoExtension.class)
 class HoldingsExportStrategyTest {
@@ -392,5 +405,109 @@ class HoldingsExportStrategyTest {
     verify(errorLogService)
         .saveGeneralErrorWithMessageValues(
             ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
+  }
+
+    @Test
+  void getGeneratedMarcShouldHandleTransformationRuleException() throws TransformationRuleException {
+    // TestMate-1bb604bb48237bb46f5f05f270ea3ab7
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var mappingProfile = new MappingProfile();
+    var holdingId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var holdingsWithInstanceAndItems = Map.of(holdingId, new JSONObject());
+    var result = new GeneratedMarcResult(jobExecutionId);
+    var exceptionMessage = "Invalid transformation rules";
+    when(ruleFactory.getRules(mappingProfile)).thenThrow(new TransformationRuleException(exceptionMessage));
+    // When
+    var actualResult = holdingsExportStrategy.getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
+    // Then
+    assertThat(actualResult).isSameAs(result);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    verify(errorLogService).saveGeneralError(exceptionMessage, jobExecutionId);
+    verify(ruleProcessor, never()).process(any(EntityReader.class), any(RecordWriter.class), any(ReferenceDataWrapper.class), anyList(), any());
+  }
+
+    @Test
+  void getGeneratedMarcShouldHandleEmptyHoldingsMap() throws Exception {
+    // TestMate-41073463bfdaf1550ebf6f71e1829514
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var mappingProfile = new MappingProfile();
+    var result = new GeneratedMarcResult(jobExecutionId);
+    Map<UUID, JSONObject> holdingsWithInstanceAndItems = new HashMap<>();
+    List<Rule> rules = Collections.emptyList();
+    when(ruleFactory.getRules(mappingProfile)).thenReturn(rules);
+    // When
+    var actualResult = holdingsExportStrategy.getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
+    // Then
+    assertThat(actualResult).isSameAs(result);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    assertThat(actualResult.getFailedIds()).isEmpty();
+    verify(ruleProcessor, never())
+        .process(any(EntityReader.class), any(RecordWriter.class), any(ReferenceDataWrapper.class), anyList(), any());
+    verify(errorLogService, never()).saveGeneralError(any(), any());
+  }
+
+    @Test
+  void getGeneratedMarcShouldHandleMarcExceptionInCentralTenantContext() throws TransformationRuleException {
+    // TestMate-afda6f3c8e1b6aace1be1f5fdabf0a12
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var centralTenantId = "central";
+    var memberTenantId = "member";
+    var userId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var mappingProfile = new MappingProfile();
+    var result = new GeneratedMarcResult(jobExecutionId);
+    var holdingId1 = UUID.fromString("00000000-0000-0000-0000-000000000011");
+    var holdingId2 = UUID.fromString("00000000-0000-0000-0000-000000000022");
+    var holdingJson1 = new JSONObject();
+    var h1Array = new JSONArray();
+    h1Array.add(new JSONObject(Map.of(ID_KEY, holdingId1.toString())));
+    holdingJson1.put(HOLDINGS_KEY, h1Array);
+    var holdingJson2 = new JSONObject();
+    var h2Array = new JSONArray();
+    h2Array.add(new JSONObject(Map.of(ID_KEY, holdingId2.toString())));
+    holdingJson2.put(HOLDINGS_KEY, h2Array);
+    Map<UUID, JSONObject> holdingsWithInstanceAndItems = new LinkedHashMap<>();
+    holdingsWithInstanceAndItems.put(holdingId1, holdingJson1);
+    holdingsWithInstanceAndItems.put(holdingId2, holdingJson2);
+    var rules = Collections.singletonList(new Rule());
+    var referenceDataWrapper = mock(ReferenceDataWrapper.class);
+    var holdingsDto1 = new Holdings();
+    holdingsDto1.setTenantId(centralTenantId);
+    var holdingsDto2 = new Holdings();
+    holdingsDto2.setTenantId(memberTenantId);
+    // Prepare headers for context switching in fillOutFromCentralTenant
+    Map<String, Collection<String>> headers = new HashMap<>();
+    headers.put("x-okapi-tenant", List.of(centralTenantId));
+    when(folioExecutionContext.getTenantId()).thenReturn(centralTenantId);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(folioExecutionContext.getAllHeaders()).thenReturn(headers);
+    when(consortiaService.getCentralTenantId(centralTenantId)).thenReturn(centralTenantId);
+    when(consortiaService.getAffiliatedTenants(centralTenantId, userId.toString())).thenReturn(List.of(memberTenantId));
+    
+    when(consortiumSearchClient.getHoldingsById(holdingId1.toString())).thenReturn(holdingsDto1);
+    when(consortiumSearchClient.getHoldingsById(holdingId2.toString())).thenReturn(holdingsDto2);
+    when(ruleFactory.getRules(mappingProfile)).thenReturn(rules);
+    when(referenceDataProvider.getReference(anyString())).thenReturn(referenceDataWrapper);
+    
+    // Use doReturn().when() for spies to avoid calling the real method during stubbing, which causes NPE in RuleHandler
+    org.mockito.Mockito.doReturn(rules).when(ruleHandler).preHandle(any(JSONObject.class), anyList());
+    
+    when(ruleProcessor.process(isA(EntityReader.class), isA(RecordWriter.class), eq(referenceDataWrapper), eq(rules), any()))
+        .thenReturn("MARC_CONTENT_1")
+        .thenThrow(new MarcException("Simulated failure"));
+    // When
+    var actualResult = holdingsExportStrategy.getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
+    // Then
+    assertThat(actualResult.getMarcRecords()).hasSize(1).containsExactly("MARC_CONTENT_1");
+    assertThat(actualResult.getFailedIds()).hasSize(1).containsExactly(holdingId2);
+    var errorCodeCaptor = ArgumentCaptor.forClass(String.class);
+    var messageValuesCaptor = ArgumentCaptor.forClass(List.class);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(errorCodeCaptor.capture(), messageValuesCaptor.capture(), eq(jobExecutionId));
+    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), errorCodeCaptor.getValue());
+    assertThat(messageValuesCaptor.getValue()).containsExactly("Simulated failure for holding " + holdingId2);
+    verify(ruleProcessor, times(2)).process(any(), any(), any(), any(), any());
   }
 }
