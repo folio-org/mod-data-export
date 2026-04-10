@@ -1,7 +1,9 @@
 package org.folio.dataexp.service.export.strategies;
 
 import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
+import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +34,7 @@ import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -193,7 +196,14 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       LocalStorageWriter localStorageWriter) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())
         || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
-      var deletedMarcRecords = getMarcDeleted(exportRequest);
+      var deletedMarcRecords = new ArrayList<>(getMarcDeleted(exportRequest));
+      var sharedMarcIds = getSharedMarcIds(deletedMarcRecords.stream()
+        .map(MarcRecordEntity::getExternalId)
+        .collect(Collectors.toSet()));
+      if (!sharedMarcIds.isEmpty()) {
+        deletedMarcRecords.removeIf(marcRecordEntity ->
+          sharedMarcIds.contains(marcRecordEntity.getExternalId()));
+      }
       entityManager.clear();
       processMarcInstances(
           exportFilesEntity,
@@ -211,6 +221,19 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
           deletedMarcInstances,
           localStorageWriter);
     }
+  }
+
+  private Set<UUID> getSharedMarcIds(Set<UUID> ids) {
+    Set<UUID> result = new HashSet<>();
+    var currentTenantId = folioExecutionContext.getTenantId();
+    var centralTenantId = consortiaService.getCentralTenantId(currentTenantId);
+    if (!centralTenantId.isEmpty() && !centralTenantId.equals(currentTenantId)) {
+      result = marcInstanceRecordRepository
+        .findActualAndDeletedByExternalIdIn(centralTenantId, ids).stream()
+          .map(MarcRecordEntity::getExternalId)
+          .collect(Collectors.toSet());
+    }
+    return result;
   }
 
   private void processFolioSlices(

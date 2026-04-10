@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.apache.maven.shared.utils.StringUtils;
 import org.folio.dataexp.TestMate;
@@ -41,6 +42,7 @@ import org.folio.dataexp.repository.FolioInstanceAllRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceAllRepository;
+import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -78,6 +80,7 @@ class InstancesExportAllStrategyTest {
   @Mock private RuleFactory ruleFactory;
   @Mock private RuleHandler ruleHandler;
   @Mock private RuleProcessor ruleProcessor;
+  @Mock private MarcInstanceRecordRepository marcInstanceRecordRepository;
 
   @InjectMocks private InstancesExportAllStrategy instancesExportAllStrategy;
 
@@ -402,6 +405,7 @@ class InstancesExportAllStrategyTest {
         .thenReturn(List.of(deletedMarcRecord));
     when(jsonToMarcConverter.convertJsonRecordToMarcRecord(any(), any(), any()))
         .thenReturn("marc-content");
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
 
     var exportStatistic = new ExportStrategyStatistic(mock(ExportedRecordsListener.class));
     var exportFilesEntity =
@@ -423,6 +427,93 @@ class InstancesExportAllStrategyTest {
     verify(marcInstanceAllRepository).findMarcInstanceAllDeleted();
     verify(entityManager, atLeastOnce()).clear();
     verify(localStorageWriter).write("marc-content");
+
+    assertThat(deletedMarcRecord.isDeleted()).isTrue();
+  }
+
+  @Test
+  @SneakyThrows
+  void processSlicesShouldExcludeSharedWhenHandleDeletedMarcRecordsWhenSrsRequested() {
+    // Given
+    var batchSize = 10;
+
+    var mappingProfileEntityRepository =
+        mock(org.folio.dataexp.repository.MappingProfileEntityRepository.class);
+
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "exportIdsBatch", batchSize);
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "entityManager", entityManager);
+    ReflectionTestUtils.setField(
+        instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
+    ReflectionTestUtils.setField(
+        instancesExportAllStrategy,
+        "mappingProfileEntityRepository",
+        mappingProfileEntityRepository);
+    var exportRequest = new ExportRequest();
+    exportRequest.setSuppressedFromDiscovery(true);
+    exportRequest.setDeletedRecords(true);
+    exportRequest.setLastExport(true);
+
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
+
+    var defaultMappingProfile = new MappingProfile();
+    defaultMappingProfile.setRecordTypes(new java.util.ArrayList<>());
+    var defaultMappingProfileEntity = new org.folio.dataexp.domain.entity.MappingProfileEntity();
+    defaultMappingProfileEntity.setMappingProfile(defaultMappingProfile);
+
+    var deletedMarcRecord =
+        MarcRecordEntity.builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000004"))
+            .externalId(UUID.fromString("00000000-0000-0000-0000-000000000005"))
+            .content("{\"leader\":\"00000dam  2200000 i 4500\"}")
+            .build();
+    var sharedMarcRecord =
+        MarcRecordEntity.builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000006"))
+            .externalId(UUID.fromString("00000000-0000-0000-0000-000000000005"))
+            .content("{\"leader\":\"00000nam  2200000 i 4500\"}")
+            .build();
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var fromId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var toId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    when(mappingProfileEntityRepository.getReferenceById(any(UUID.class)))
+        .thenReturn(defaultMappingProfileEntity);
+    when(folioInstanceAllRepository.findFolioInstanceAll(
+            eq(fromId), eq(toId), any(PageRequest.class)))
+        .thenReturn(new SliceImpl<>(List.of()));
+    when(marcInstanceAllRepository.findMarcInstanceAllNonDeleted(
+            eq(fromId), eq(toId), any(PageRequest.class)))
+        .thenReturn(new SliceImpl<>(List.of()));
+    when(marcInstanceAllRepository.findMarcInstanceAllDeleted())
+        .thenReturn(List.of(deletedMarcRecord));
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
+    when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(
+            "central", Set.of(sharedMarcRecord.getExternalId())))
+        .thenReturn(
+            List.of(
+                MarcRecordEntity.builder().externalId(sharedMarcRecord.getExternalId()).build()));
+
+    var exportStatistic = new ExportStrategyStatistic(mock(ExportedRecordsListener.class));
+    var exportFilesEntity =
+        JobExecutionExportFilesEntity.builder()
+            .jobExecutionId(jobExecutionId)
+            .fromId(fromId)
+            .toId(toId)
+            .build();
+
+    // When
+    instancesExportAllStrategy.processSlices(
+        exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+
+    // Then
+    verify(folioInstanceAllRepository)
+        .findFolioInstanceAll(eq(fromId), eq(toId), any(PageRequest.class));
+    verify(marcInstanceAllRepository)
+        .findMarcInstanceAllNonDeleted(eq(fromId), eq(toId), any(PageRequest.class));
+    verify(marcInstanceAllRepository).findMarcInstanceAllDeleted();
+    verify(entityManager, atLeastOnce()).clear();
+    verify(jsonToMarcConverter, never()).convertJsonRecordToMarcRecord(any(), any(), any());
 
     assertThat(deletedMarcRecord.isDeleted()).isTrue();
   }
