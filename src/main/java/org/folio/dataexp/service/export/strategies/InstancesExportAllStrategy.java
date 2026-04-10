@@ -205,7 +205,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
           var id = marcRecordEntity.getExternalId();
           if (sharedRecords.containsKey(id)) {
             marcRecordEntity.setContent(sharedRecords.get(id).getContent());
-            marcRecordEntity.setDeleted(false);
           }
         });
       }
@@ -234,7 +233,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     var centralTenantId = consortiaService.getCentralTenantId(currentTenantId);
     if (!centralTenantId.isEmpty() && !centralTenantId.equals(currentTenantId)) {
       result = marcInstanceRecordRepository
-        .findByExternalIdIn(centralTenantId, ids).stream()
+        .findActualAndDeletedByExternalIdIn(centralTenantId, ids).stream()
           .collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
     }
     return result;
