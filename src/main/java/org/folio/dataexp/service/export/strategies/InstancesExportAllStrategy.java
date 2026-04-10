@@ -1,11 +1,12 @@
 package org.folio.dataexp.service.export.strategies;
 
 import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
-import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +35,6 @@ import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -197,12 +197,17 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())
         || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var deletedMarcRecords = new ArrayList<>(getMarcDeleted(exportRequest));
-      var sharedMarcIds = getSharedMarcIds(deletedMarcRecords.stream()
+      var sharedRecords = getSharedRecords(deletedMarcRecords.stream()
         .map(MarcRecordEntity::getExternalId)
         .collect(Collectors.toSet()));
-      if (!sharedMarcIds.isEmpty()) {
-        deletedMarcRecords.removeIf(marcRecordEntity ->
-          sharedMarcIds.contains(marcRecordEntity.getExternalId()));
+      if (!sharedRecords.isEmpty()) {
+        deletedMarcRecords.forEach(marcRecordEntity -> {
+          var id = marcRecordEntity.getExternalId();
+          if (sharedRecords.containsKey(id)) {
+            marcRecordEntity.setContent(sharedRecords.get(id).getContent());
+            marcRecordEntity.setDeleted(false);
+          }
+        });
       }
       entityManager.clear();
       processMarcInstances(
@@ -223,15 +228,14 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     }
   }
 
-  private Set<UUID> getSharedMarcIds(Set<UUID> ids) {
-    Set<UUID> result = new HashSet<>();
+  private Map<UUID, MarcRecordEntity> getSharedRecords(Set<UUID> ids) {
+    Map<UUID, MarcRecordEntity> result = new HashMap<>();
     var currentTenantId = folioExecutionContext.getTenantId();
     var centralTenantId = consortiaService.getCentralTenantId(currentTenantId);
     if (!centralTenantId.isEmpty() && !centralTenantId.equals(currentTenantId)) {
       result = marcInstanceRecordRepository
         .findByExternalIdIn(centralTenantId, ids).stream()
-          .map(MarcRecordEntity::getExternalId)
-          .collect(Collectors.toSet());
+          .collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
     }
     return result;
   }
