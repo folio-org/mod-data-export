@@ -229,7 +229,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     var centralTenantId = consortiaService.getCentralTenantId(currentTenantId);
     if (!centralTenantId.isEmpty() && !centralTenantId.equals(currentTenantId)) {
       result = marcInstanceRecordRepository
-        .findActualAndDeletedByExternalIdIn(centralTenantId, ids).stream()
+        .findByExternalIdIn(centralTenantId, ids).stream()
           .map(MarcRecordEntity::getExternalId)
           .collect(Collectors.toSet());
     }
