@@ -489,7 +489,7 @@ class InstancesExportAllStrategyTest {
         .thenReturn(List.of(deletedMarcRecord));
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(jsonToMarcConverter.convertJsonRecordToMarcRecord(any(), any(), any()))
-      .thenReturn("marc-content");
+        .thenReturn("marc-content");
     when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(
             "central", Set.of(sharedMarcRecord.getExternalId())))
         .thenReturn(

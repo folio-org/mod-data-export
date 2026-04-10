@@ -198,8 +198,8 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var deletedMarcRecords = new ArrayList<>(getMarcDeleted(exportRequest));
       var sharedRecords = getSharedRecords(deletedMarcRecords.stream()
-        .map(MarcRecordEntity::getExternalId)
-        .collect(Collectors.toSet()));
+          .map(MarcRecordEntity::getExternalId)
+          .collect(Collectors.toSet()));
       if (!sharedRecords.isEmpty()) {
         deletedMarcRecords.forEach(marcRecordEntity -> {
           var id = marcRecordEntity.getExternalId();
