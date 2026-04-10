@@ -68,16 +68,16 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       "Record is too long to be a valid MARC binary record";
   public static final String DEFAULT_INSTANCE_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
-  private final ConsortiaService consortiaService;
+  protected final ConsortiaService consortiaService;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
-  private final MarcInstanceRecordRepository marcInstanceRecordRepository;
+  protected final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final RuleFactory ruleFactory;
   private final RuleHandler ruleHandler;
   private final RuleProcessor ruleProcessor;
   private final ReferenceDataProvider referenceDataProvider;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
   private final HoldingsItemsResolverService holdingsItemsResolver;
-  private final FolioModuleMetadata folioModuleMetadata;
+  protected final FolioModuleMetadata folioModuleMetadata;
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
 

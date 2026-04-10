@@ -2,8 +2,11 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -193,7 +196,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       LocalStorageWriter localStorageWriter) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())
         || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
-      var deletedMarcRecords = getMarcDeleted(exportRequest);
+      var deletedMarcRecords = new ArrayList<>(getMarcDeleted(exportRequest));
+      var sharedRecords = getSharedRecords(deletedMarcRecords.stream()
+          .map(MarcRecordEntity::getExternalId)
+          .collect(Collectors.toSet()));
+      if (!sharedRecords.isEmpty()) {
+        deletedMarcRecords.forEach(marcRecordEntity -> {
+          var id = marcRecordEntity.getExternalId();
+          if (sharedRecords.containsKey(id)) {
+            marcRecordEntity.setContent(sharedRecords.get(id).getContent());
+          }
+        });
+      }
       entityManager.clear();
       processMarcInstances(
           exportFilesEntity,
@@ -211,6 +225,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
           deletedMarcInstances,
           localStorageWriter);
     }
+  }
+
+  private Map<UUID, MarcRecordEntity> getSharedRecords(Set<UUID> ids) {
+    Map<UUID, MarcRecordEntity> result = new HashMap<>();
+    var currentTenantId = folioExecutionContext.getTenantId();
+    var centralTenantId = consortiaService.getCentralTenantId(currentTenantId);
+    if (!centralTenantId.isEmpty() && !centralTenantId.equals(currentTenantId)) {
+      result = marcInstanceRecordRepository
+        .findActualAndDeletedByExternalIdIn(centralTenantId, ids).stream()
+          .collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
+    }
+    return result;
   }
 
   private void processFolioSlices(
