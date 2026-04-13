@@ -202,7 +202,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
           .collect(Collectors.toSet()));
       if (!sharedRecordIds.isEmpty()) {
         deletedMarcRecords.removeIf(marcRecordEntity ->
-          sharedRecordIds.contains(marcRecordEntity.getExternalId()));
+            sharedRecordIds.contains(marcRecordEntity.getExternalId()));
       }
       entityManager.clear();
       processMarcInstances(
