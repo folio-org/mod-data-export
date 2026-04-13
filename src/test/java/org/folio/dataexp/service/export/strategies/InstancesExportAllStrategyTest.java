@@ -488,8 +488,6 @@ class InstancesExportAllStrategyTest {
     when(marcInstanceAllRepository.findMarcInstanceAllDeleted())
         .thenReturn(List.of(deletedMarcRecord));
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
-    when(jsonToMarcConverter.convertJsonRecordToMarcRecord(any(), any(), any()))
-        .thenReturn("marc-content");
     when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(
             "central", Set.of(sharedMarcRecord.getExternalId())))
         .thenReturn(
@@ -515,7 +513,7 @@ class InstancesExportAllStrategyTest {
         .findMarcInstanceAllNonDeleted(eq(fromId), eq(toId), any(PageRequest.class));
     verify(marcInstanceAllRepository).findMarcInstanceAllDeleted();
     verify(entityManager, atLeastOnce()).clear();
-    verify(localStorageWriter).write("marc-content");
+    verify(jsonToMarcConverter, never()).convertJsonRecordToMarcRecord(any(), any(), any());
   }
 
   private String generateTooLongString() {
