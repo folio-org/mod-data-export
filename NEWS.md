@@ -1,4 +1,59 @@
-## v5.3.0 Unreleased
+## v5.5.0 Unreleased
+
+## 04/17/2026 v5.4.0 Released
+
+This release contains LINKED_DATA support and other improvements and bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.2.1...v5.4.0)
+
+### Bugs
+[MDEXP-917](https://folio-org.atlassian.net/browse/MDEXP-917) Not deleted suppressed from discovery and staff suppressed FOLIO Instance is not included in export all result with "deletedRecords": falseBug
+[MDEXP-909](https://folio-org.atlassian.net/browse/MDEXP-909) Exported ZIP archive contains files of incorrect type when export file size limit is setBug
+[MDEXP-897](https://folio-org.atlassian.net/browse/MDEXP-897) Not deleted MARC Instance shared from Member tenant is included in result of export all Instances from Member tenant as local, deletedBug
+[MDEXP-896](https://folio-org.atlassian.net/browse/MDEXP-896) Not deleted MARC Instance shared from Member tenant is included in result of export deleted MARC records from Member tenantBug
+[MDEXP-888](https://folio-org.atlassian.net/browse/MDEXP-888) ECS Holdings errors repeated twice on Error logs page when export Holdings in Central tenantBug
+[MDEXP-816](https://folio-org.atlassian.net/browse/MDEXP-816) Holdings Permanent and Temporary location not being exported when Temporary location is set in holdings recordBug
+[MDEXP-812](https://folio-org.atlassian.net/browse/MDEXP-812)Inconsistent statistics in "Failed" column for 100K+ data export job Bug
+[MDEXP-778](https://folio-org.atlassian.net/browse/MDEXP-778) Review solution implemented in MDEXP-775 to address issues in ECS environment related to state "deleted"Bug
+
+### Stories
+[MDEXP-910](https://folio-org.atlassian.net/browse/MDEXP-910) Upgrade the version of lib-linked-data-rdf4ld in mod-data-exportStory
+[MDEXP-900](https://folio-org.atlassian.net/browse/MDEXP-900) Enable Feign retry mechanic for FQM query clientStory
+[MDEXP-894](https://folio-org.atlassian.net/browse/MDEXP-894) Locking and unlocking mapping profileStory
+[MDEXP-889](https://folio-org.atlassian.net/browse/MDEXP-889) ECS - Resolve issue with Data export caching mechanism when locations are not presentStory
+[MDEXP-886](https://folio-org.atlassian.net/browse/MDEXP-886) Derive record type from mapping profile during export strategy selectionStory
+[MDEXP-885](https://folio-org.atlassian.net/browse/MDEXP-885) Export Linked Data as JSON-LinesStory
+[MDEXP-884](https://folio-org.atlassian.net/browse/MDEXP-884) Set export job filename suffix according to output formatStory
+[MDEXP-882](https://folio-org.atlassian.net/browse/MDEXP-882) Karate Tests: Linked Data exportStory
+[MDEXP-875](https://folio-org.atlassian.net/browse/MDEXP-875) Use multithreading for Linked Data exportStory
+[MDEXP-874](https://folio-org.atlassian.net/browse/MDEXP-874) Set Linked Data exported file suffixStory
+[MDEXP-870](https://folio-org.atlassian.net/browse/MDEXP-870) Adjust how record is identified as deletedStory
+[MDEXP-868](https://folio-org.atlassian.net/browse/MDEXP-868) Create a Linked Data converter componentStory
+[MDEXP-866](https://folio-org.atlassian.net/browse/MDEXP-866) Create Linked Data export strategyStory
+[MDEXP-865](https://folio-org.atlassian.net/browse/MDEXP-865) Integrate Linked Data provider with Linked Data export strategyStory
+[MDEXP-864](https://folio-org.atlassian.net/browse/MDEXP-864) Integrate query service into Linked Data strategy providerStory
+[MDEXP-863](https://folio-org.atlassian.net/browse/MDEXP-863) Create an FQM query serviceStory
+[MDEXP-862](https://folio-org.atlassian.net/browse/MDEXP-862) Create an FQM clientStory
+[MDEXP-836](https://folio-org.atlassian.net/browse/MDEXP-836) BE - Export authority records using CQLStory
+[MDEXP-830](https://folio-org.atlassian.net/browse/MDEXP-830) Spike - Remove data export dependency on instance_audit tableStory
+
+### Technical tasks
+[MDEXP-907](https://folio-org.atlassian.net/browse/MDEXP-907) Upgrade module to SpringBoot4.0 and Spring7.0Task
+[MDEXP-903](https://folio-org.atlassian.net/browse/MDEXP-903) Use GET /base-url to get FOLIO_HOST valueTask
+[MDEXP-901](https://folio-org.atlassian.net/browse/MDEXP-901) Add S3_SUB_PATH Environment Variable SupportTask
+[MDEXP-899](https://folio-org.atlassian.net/browse/MDEXP-899) Deleting mapping profilesTask
+[MDEXP-898](https://folio-org.atlassian.net/browse/MDEXP-898) Deleting job profilesTask
+[MDEXP-895](https://folio-org.atlassian.net/browse/MDEXP-895) Locking and unlocking job profileTask
+[MDEXP-854](https://folio-org.atlassian.net/browse/MDEXP-854) Create Application Descriptor Repository for app-data-exportTask
+[MDEXP-852](https://folio-org.atlassian.net/browse/MDEXP-852) Update for Split Search & Browse APIsTask
+[MDEXP-850](https://folio-org.atlassian.net/browse/MDEXP-850) Update to Support itemLevelCallNumberTypeId Constraint (Breaking Change)Task
+[MDEXP-847](https://folio-org.atlassian.net/browse/MDEXP-847) Add "Invalid CQL syntax" error for the case of export Authority record via file with .cql query Task
+[MDEXP-839](https://folio-org.atlassian.net/browse/MDEXP-839) Remove PLATFORM env var, drop Okapi codeTask
+[MDEXP-835](https://folio-org.atlassian.net/browse/MDEXP-835) Re-work all s3 related env vars and standardizationTask
+[MDEXP-779](https://folio-org.atlassian.net/browse/MDEXP-779) Tech Debt: enable check-style pluginTask
+
+### Tech debts
+[MDEXP-833](https://folio-org.atlassian.net/browse/MDEXP-833) Remove openssh sshpass (sftp) from DockerfileTech Debt
 
 ## 03/27/2025 v5.2.1 Released
 
