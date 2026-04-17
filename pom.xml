@@ -43,12 +43,12 @@
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
 
-    <folio-spring-base.version>10.0.0-RC1</folio-spring-base.version>
+    <folio-spring-base.version>10.0.0</folio-spring-base.version>
     <folio-spring-cql.version>9.1.0</folio-spring-cql.version>
-    <generate-marc-utils-version>1.11.0-SNAPSHOT</generate-marc-utils-version>
+    <generate-marc-utils-version>1.11.0</generate-marc-utils-version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <aws-sdk-java.version>2.25.12</aws-sdk-java.version>
-    <folio-s3-client.version>3.0.0-SNAPSHOT</folio-s3-client.version>
+    <folio-s3-client.version>3.0.0</folio-s3-client.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <marc4j.version>2.9.2</marc4j.version>
     <mapstruct.version>1.5.3.Final</mapstruct.version>
@@ -56,8 +56,8 @@
     <awaitility.version>4.2.0</awaitility.version>
     <json-smart.version>2.5.2</json-smart.version>
     <json-path.version>2.9.0</json-path.version>
-    <lib-fqm-query-processor.version>4.0.2</lib-fqm-query-processor.version>
-    <lib-linked-data-rdf4ld.version>1.0.0-SNAPSHOT</lib-linked-data-rdf4ld.version>
+    <lib-fqm-query-processor.version>4.1.0</lib-fqm-query-processor.version>
+    <lib-linked-data-rdf4ld.version>1.0.0</lib-linked-data-rdf4ld.version>
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.21.4</testcontainer.version>
