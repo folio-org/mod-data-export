@@ -101,13 +101,13 @@ class DataExportTenantServiceTest {
     dataExportTenantService.loadReferenceData();
     // Then
     var mappingProfileCaptor = ArgumentCaptor.forClass(MappingProfileEntity.class);
-    verify(mappingProfileEntityRepository, times(4)).save(mappingProfileCaptor.capture());
+    verify(mappingProfileEntityRepository, times(3)).save(mappingProfileCaptor.capture());
 
     var capturedEntities = mappingProfileCaptor.getAllValues();
-    assertThat(capturedEntities).hasSize(4);
+    assertThat(capturedEntities).hasSize(3);
     assertThat(capturedEntities.getFirst().getId()).isEqualTo(mappingProfileId);
     assertThat(capturedEntities.getFirst().getName()).isEqualTo("Default mapping profile");
-    verify(jobProfileEntityRepository, times(5)).save(any(JobProfileEntity.class));
+    verify(jobProfileEntityRepository, times(4)).save(any(JobProfileEntity.class));
   }
 
   @Test
@@ -124,13 +124,13 @@ class DataExportTenantServiceTest {
     jobProfile.setName("Valid job profile");
     when(objectMapper.readValue(any(InputStream.class), eq(MappingProfile.class)))
         .thenThrow(new RuntimeException("Simulated parsing error"))
-        .thenReturn(mappingProfile, mappingProfile, mappingProfile);
+        .thenReturn(mappingProfile, mappingProfile);
     when(objectMapper.readValue(any(InputStream.class), eq(JobProfile.class)))
         .thenReturn(jobProfile);
     // When
     dataExportTenantService.loadReferenceData();
     // Then
-    verify(mappingProfileEntityRepository, times(3)).save(any(MappingProfileEntity.class));
-    verify(jobProfileEntityRepository, times(5)).save(any(JobProfileEntity.class));
+    verify(mappingProfileEntityRepository, times(2)).save(any(MappingProfileEntity.class));
+    verify(jobProfileEntityRepository, times(4)).save(any(JobProfileEntity.class));
   }
 }
