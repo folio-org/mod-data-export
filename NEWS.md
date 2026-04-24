@@ -1,4 +1,6 @@
-## v5.5.0 Unreleased
+## 04/24/2026 v5.4.1 Released
+### Bugs
+[MDEXP-908](https://folio-org.atlassian.net/browse/MDEXP-908) Default Linked Data profiles moved to Liquibase scripts
 
 ## 04/17/2026 v5.4.0 Released
 
