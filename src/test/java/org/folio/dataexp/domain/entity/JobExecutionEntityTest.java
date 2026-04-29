@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
+import org.folio.dataexp.domain.entity.JobExecutionEntity;
 
 class JobExecutionEntityTest {
 
@@ -40,6 +43,68 @@ class JobExecutionEntityTest {
       assertThat(jobExecution.getLastUpdatedDate().getTime()).isEqualTo(expectedDate.getTime());
       assertThat(actualEntity.getJobExecution()).isSameAs(jobExecution);
       assertThat(actualEntity.getJobProfileName()).isEqualTo("Test Profile");
+    }
+  }
+
+    @Test
+  @TestMate(name = "TestMate-fromJobExecutionShouldHandleNullProgressAndRunBy")
+  void fromJobExecutionShouldHandleNullProgressAndRunBy() {
+    // TestMate-fc8e48f3ce15d9afef208241b05a524d
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var expectedTimestamp = 1705314600000L; // 2024-01-15T10:30:00Z
+    var jobExecution = new JobExecution()
+        .id(jobExecutionId)
+        .status(JobExecution.StatusEnum.IN_PROGRESS)
+        .progress(null)
+        .runBy(null);
+    try (MockedConstruction<Date> mockedDate = mockConstruction(Date.class, (mock, context) -> {
+      if (context.arguments().isEmpty()) {
+        when(mock.getTime()).thenReturn(expectedTimestamp);
+      }
+    })) {
+      // When
+      var actualEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+      // Then
+      assertThat(actualEntity.getId()).isEqualTo(jobExecutionId);
+      assertThat(actualEntity.getStatus()).isEqualTo(JobExecution.StatusEnum.IN_PROGRESS);
+      
+      assertThat(actualEntity.getTotal()).isNull();
+      assertThat(actualEntity.getExported()).isNull();
+      assertThat(actualEntity.getFailed()).isNull();
+      
+      assertThat(actualEntity.getRunById()).isNull();
+      assertThat(actualEntity.getRunByFirstName()).isNull();
+      assertThat(actualEntity.getRunByLastName()).isNull();
+      assertThat(jobExecution.getLastUpdatedDate().getTime()).isEqualTo(expectedTimestamp);
+      assertThat(actualEntity.getJobExecution()).isSameAs(jobExecution);
+    }
+  }
+
+    @Test
+  void fromJobExecutionShouldHandleNullDates() {
+    // TestMate-5f4b4d93a95e17e1219e238028bf52ac
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var expectedTimestamp = 1705314600000L;
+    var jobExecution = new JobExecution()
+        .id(jobExecutionId)
+        .status(JobExecution.StatusEnum.IN_PROGRESS)
+        .startedDate(null)
+        .completedDate(null);
+    try (MockedConstruction<Date> mockedDate = mockConstruction(Date.class, (mock, context) -> {
+      if (context.arguments().isEmpty()) {
+        when(mock.getTime()).thenReturn(expectedTimestamp);
+      }
+    })) {
+      // When
+      var actualEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+      // Then
+      assertThat(actualEntity.getStartedDate()).isNull();
+      assertThat(actualEntity.getCompletedDate()).isNull();
+      assertThat(actualEntity.getId()).isEqualTo(jobExecutionId);
+      assertThat(actualEntity.getJobExecution()).isSameAs(jobExecution);
+      assertThat(jobExecution.getLastUpdatedDate().getTime()).isEqualTo(expectedTimestamp);
     }
   }
 }
