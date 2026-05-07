@@ -1,5 +1,9 @@
 ## v5.5.0 Unreleased
 
+
+### Bugs
+[MDEXP-921](https://folio-org.atlassian.net/browse/MDEXP-921) “Failed“ column is empty when export using Default linked data export job profile completes with errors or fails with not found records
+
 ## 04/17/2026 v5.4.0 Released
 
 This release contains LINKED_DATA support and other improvements and bug fixes
