@@ -26,7 +26,6 @@ class DefaultProfilesMigrationIT extends BaseDataExportInitializerIT {
   @Autowired private JobProfileEntityRepository jobProfileEntityRepository;
   @Autowired private MappingProfileEntityRepository mappingProfileEntityRepository;
 
-
   @Test
   void liquibaseShouldInsertDefaultLinkedDataMappingProfile() {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
