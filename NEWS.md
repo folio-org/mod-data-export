@@ -1,10 +1,10 @@
+## 05/12/2026 v5.4.2 Released
+### Bugs
+[MDEXP-921](https://folio-org.atlassian.net/browse/MDEXP-921) “Failed“ column is empty when export using Default linked data export job profile completes with errors or fails with not found records
+
 ## 04/24/2026 v5.4.1 Released
 ### Bugs
 [MDEXP-908](https://folio-org.atlassian.net/browse/MDEXP-908) Default Linked Data profiles moved to Liquibase scripts
-
-
-### Bugs
-[MDEXP-921](https://folio-org.atlassian.net/browse/MDEXP-921) “Failed“ column is empty when export using Default linked data export job profile completes with errors or fails with not found records
 
 ## 04/17/2026 v5.4.0 Released
 
