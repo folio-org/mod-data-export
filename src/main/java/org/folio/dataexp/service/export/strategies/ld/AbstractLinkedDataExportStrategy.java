@@ -217,6 +217,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
               .map(UUID::fromString)
               .collect(Collectors.toSet());
       externalIds.removeAll(resultUuids);
+      exportStatistic.setFailed(exportStatistic.getFailed() + externalIds.size());
       exportStatistic.addNotExistIdsAll(externalIds.stream().toList());
     }
   }
