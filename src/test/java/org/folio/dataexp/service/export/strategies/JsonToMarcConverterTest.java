@@ -77,11 +77,12 @@ class JsonToMarcConverterTest {
     // MARC-21/MARC-8 escape sequence for Greek is ESC ( g, followed by the character code.
     // ESC = 0x1B (27), '(' = 0x28 (40), 'g' = 0x67 (103)
     byte[] greekEscapeSequence = new byte[] {(byte) 0x1B, (byte) 0x28, (byte) 0x67};
-    assertThat(actualBytes).isNotEmpty();
-    assertThat(actualBytes).doesNotContain(utf8Bytes);
     // Verify that the converter applied MARC-8 encoding by checking for the Greek escape sequence
-    assertThat(actualBytes).containsSequence(greekEscapeSequence);
     // Verify structural integrity (Record Terminator)
+    assertThat(actualBytes)
+        .isNotEmpty()
+        .doesNotContain(utf8Bytes)
+        .containsSequence(greekEscapeSequence);
     assertThat(actualBytes[actualBytes.length - 1]).isEqualTo((byte) 0x1D);
   }
 
@@ -138,14 +139,13 @@ class JsonToMarcConverterTest {
     try (var is = new java.io.ByteArrayInputStream(actualBytes)) {
       var reader = new org.marc4j.MarcStreamReader(is);
       assertThat(reader.hasNext()).isTrue();
-      var record = reader.next();
+      var r = reader.next();
       // Verify 001 exists
-      assertThat(record.getControlNumber()).isEqualTo("instance-001");
+      assertThat(r.getControlNumber()).isEqualTo("instance-001");
       // Verify 500 is suppressed
-      assertThat(record.getVariableFields("500")).isEmpty();
+      assertThat(r.getVariableFields("500")).isEmpty();
       // Verify 999 ff is suppressed
-      var fields999 =
-          record.getDataFields().stream().filter(f -> "999".equals(f.getTag())).toList();
+      var fields999 = r.getDataFields().stream().filter(f -> "999".equals(f.getTag())).toList();
       boolean has999ff =
           fields999.stream().anyMatch(f -> f.getIndicator1() == 'f' && f.getIndicator2() == 'f');
       assertThat(has999ff).isFalse();
@@ -193,12 +193,12 @@ class JsonToMarcConverterTest {
       var reader = new MarcStreamReader(bais);
       int recordCount = 0;
       while (reader.hasNext()) {
-        var record = reader.next();
+        var r = reader.next();
         recordCount++;
         if (recordCount == 1) {
-          assertThat(record.getControlNumber()).isEqualTo("rec-001");
+          assertThat(r.getControlNumber()).isEqualTo("rec-001");
         } else if (recordCount == 2) {
-          assertThat(record.getControlNumber()).isEqualTo("rec-002");
+          assertThat(r.getControlNumber()).isEqualTo("rec-002");
         }
       }
       assertThat(recordCount).isEqualTo(2);
@@ -235,9 +235,9 @@ class JsonToMarcConverterTest {
     try (var bais = new ByteArrayInputStream(actualBytes)) {
       var reader = new MarcStreamReader(bais);
       assertThat(reader.hasNext()).isTrue();
-      var record = reader.next();
-      assertEquals("original-id", record.getControlNumber());
-      assertEquals(1, record.getVariableFields().size());
+      var r = reader.next();
+      assertEquals("original-id", r.getControlNumber());
+      assertEquals(1, r.getVariableFields().size());
     }
   }
 }
