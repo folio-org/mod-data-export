@@ -151,17 +151,17 @@ class ConsortiaServiceTest {
   void getAffiliatedTenantsShouldReturnEmptyListWhenUserHasNoAffiliations() {
     // Given
     var consortiumId = "cons-1";
-    var userId = "unlinked-user";
-    var currentTenantId = "tenant-1";
     var consortia = new Consortia();
     consortia.setId(consortiumId);
     var consortiaCollection = new ConsortiaCollection();
     consortiaCollection.setConsortia(List.of(consortia));
     var emptyUserTenantCollection = new UserTenantCollection();
     emptyUserTenantCollection.setUserTenants(List.of());
+    var userId = "unlinked-user";
     when(consortiumClient.getConsortia()).thenReturn(consortiaCollection);
     when(consortiumClient.getConsortiaUserTenants(consortiumId, userId, Integer.MAX_VALUE))
         .thenReturn(emptyUserTenantCollection);
+    var currentTenantId = "tenant-1";
     // When
     var result = consortiaService.getAffiliatedTenants(currentTenantId, userId);
     // Then
@@ -174,24 +174,24 @@ class ConsortiaServiceTest {
   @TestMate(name = "TestMate-9770ee36596ab839901934234deaaf48")
   void getAffiliatedTenantsShouldUseFirstConsortiumWhenMultipleExist() {
     // Given
-    var userId = "user-1";
-    var currentTenantId = "tenant-1";
     var firstConsortiumId = "first-cons";
     var secondConsortiumId = "second-cons";
-    var affiliatedTenantId = "affiliated-tenant-id";
     var firstConsortia = new Consortia();
     firstConsortia.setId(firstConsortiumId);
     var secondConsortia = new Consortia();
     secondConsortia.setId(secondConsortiumId);
     var consortiaCollection = new ConsortiaCollection();
     consortiaCollection.setConsortia(List.of(firstConsortia, secondConsortia));
+    var affiliatedTenantId = "affiliated-tenant-id";
     var userTenant = new UserTenant();
     userTenant.setTenantId(affiliatedTenantId);
     var userTenantCollection = new UserTenantCollection();
     userTenantCollection.setUserTenants(List.of(userTenant));
+    var userId = "user-1";
     when(consortiumClient.getConsortia()).thenReturn(consortiaCollection);
     when(consortiumClient.getConsortiaUserTenants(firstConsortiumId, userId, Integer.MAX_VALUE))
         .thenReturn(userTenantCollection);
+    var currentTenantId = "tenant-1";
     // When
     var result = consortiaService.getAffiliatedTenants(currentTenantId, userId);
     // Then
