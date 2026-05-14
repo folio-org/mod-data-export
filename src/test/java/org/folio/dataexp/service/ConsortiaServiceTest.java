@@ -4,8 +4,10 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.ConsortiaClient;
@@ -20,8 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 class ConsortiaServiceTest {
@@ -129,10 +129,9 @@ class ConsortiaServiceTest {
     verify(folioExecutionContext).getTenantId();
   }
 
-    @Test
-  @TestMate(name = "TestMate-getAffiliatedTenantsShouldReturnEmptyListWhenNoConsortiaExist")
+  @Test
+  @TestMate(name = "TestMate-eb6edcef2540a52e4d208cfd0cdeb101")
   void getAffiliatedTenantsShouldReturnEmptyListWhenNoConsortiaExist() {
-    // TestMate-eb6edcef2540a52e4d208cfd0cdeb101
     // Given
     var tenantId = "any-tenant";
     var userId = "any-user";
@@ -147,35 +146,33 @@ class ConsortiaServiceTest {
     verifyNoMoreInteractions(consortiumClient);
   }
 
-    @Test
-@TestMate(name = "TestMate-getAffiliatedTenantsShouldReturnEmptyListWhenUserHasNoAffiliations")
-void getAffiliatedTenantsShouldReturnEmptyListWhenUserHasNoAffiliations() {
-  // TestMate-23cbd8203e563263f4f0047eafc6b315
-  // Given
-  var consortiumId = "cons-1";
-  var userId = "unlinked-user";
-  var currentTenantId = "tenant-1";
-  var consortia = new Consortia();
-  consortia.setId(consortiumId);
-  var consortiaCollection = new ConsortiaCollection();
-  consortiaCollection.setConsortia(List.of(consortia));
-  var emptyUserTenantCollection = new UserTenantCollection();
-  emptyUserTenantCollection.setUserTenants(List.of());
-  when(consortiumClient.getConsortia()).thenReturn(consortiaCollection);
-  when(consortiumClient.getConsortiaUserTenants(consortiumId, userId, Integer.MAX_VALUE))
-      .thenReturn(emptyUserTenantCollection);
-  // When
-  var result = consortiaService.getAffiliatedTenants(currentTenantId, userId);
-  // Then
-  assertThat(result).isEmpty();
-  verify(consortiumClient).getConsortia();
-  verify(consortiumClient).getConsortiaUserTenants(consortiumId, userId, Integer.MAX_VALUE);
-}
+  @Test
+  @TestMate(name = "TestMate-23cbd8203e563263f4f0047eafc6b315")
+  void getAffiliatedTenantsShouldReturnEmptyListWhenUserHasNoAffiliations() {
+    // Given
+    var consortiumId = "cons-1";
+    var userId = "unlinked-user";
+    var currentTenantId = "tenant-1";
+    var consortia = new Consortia();
+    consortia.setId(consortiumId);
+    var consortiaCollection = new ConsortiaCollection();
+    consortiaCollection.setConsortia(List.of(consortia));
+    var emptyUserTenantCollection = new UserTenantCollection();
+    emptyUserTenantCollection.setUserTenants(List.of());
+    when(consortiumClient.getConsortia()).thenReturn(consortiaCollection);
+    when(consortiumClient.getConsortiaUserTenants(consortiumId, userId, Integer.MAX_VALUE))
+        .thenReturn(emptyUserTenantCollection);
+    // When
+    var result = consortiaService.getAffiliatedTenants(currentTenantId, userId);
+    // Then
+    assertThat(result).isEmpty();
+    verify(consortiumClient).getConsortia();
+    verify(consortiumClient).getConsortiaUserTenants(consortiumId, userId, Integer.MAX_VALUE);
+  }
 
-    @Test
-  @TestMate(name = "TestMate-getAffiliatedTenantsShouldUseFirstConsortiumWhenMultipleExist")
+  @Test
+  @TestMate(name = "TestMate-9770ee36596ab839901934234deaaf48")
   void getAffiliatedTenantsShouldUseFirstConsortiumWhenMultipleExist() {
-    // TestMate-9770ee36596ab839901934234deaaf48
     // Given
     var userId = "user-1";
     var currentTenantId = "tenant-1";
