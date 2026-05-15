@@ -1,11 +1,19 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.junit.jupiter.api.Test;
+import org.marc4j.MarcStreamReader;
+import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.DataFieldImpl;
 
 class JsonToMarcConverterTest {
@@ -30,5 +38,206 @@ class JsonToMarcConverterTest {
     var actual =
         convertor.convertJsonRecordToMarcRecord(json, List.of(variableField), new MappingProfile());
     assertEquals(expected, actual);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-e5e4ccf59ecd034ccf02f869c405a2ad")
+  void testConvertJsonRecordToMarcRecordWhenIsUtfFalseShouldApplyAnselEncoding()
+      throws IOException {
+    // Given
+    var jsonToMarcConverter = new JsonToMarcConverter();
+    var mappingProfile = new MappingProfile();
+    List<VariableField> additionalFields = Collections.emptyList();
+    var isUtf = false;
+    var jsonRecord =
+        """
+        {
+          "leader": "00080nam a2200049   4500",
+          "fields": [
+            {
+              "245": {
+                "subfields": [
+                  {
+                    "a": "α"
+                  }
+                ],
+                "ind1": " ",
+                "ind2": " "
+              }
+            }
+          ]
+        }""";
+    // When
+    var actualOutputStream =
+        jsonToMarcConverter.convertJsonRecordToMarcRecord(
+            jsonRecord, additionalFields, mappingProfile, isUtf);
+    // Then
+    var actualBytes = actualOutputStream.toByteArray();
+    var utf8Bytes = "α".getBytes(StandardCharsets.UTF_8);
+    // MARC-21/MARC-8 escape sequence for Greek is ESC ( g, followed by the character code.
+    // ESC = 0x1B (27), '(' = 0x28 (40), 'g' = 0x67 (103)
+    byte[] greekEscapeSequence = new byte[] {(byte) 0x1B, (byte) 0x28, (byte) 0x67};
+    // Verify that the converter applied MARC-8 encoding by checking for the Greek escape sequence
+    // Verify structural integrity (Record Terminator)
+    assertThat(actualBytes)
+        .isNotEmpty()
+        .doesNotContain(utf8Bytes)
+        .containsSequence(greekEscapeSequence);
+    assertThat(actualBytes[actualBytes.length - 1]).isEqualTo((byte) 0x1D);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-12d85d2a1b5416006022e12ee299aed1")
+  void testConvertJsonRecordToMarcRecordShouldApplyMappingProfileSuppressionRules()
+      throws IOException {
+    // Given
+    var jsonToMarcConverter = new JsonToMarcConverter();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setFieldsSuppression("500");
+    mappingProfile.setSuppress999ff(true);
+    var jsonRecord =
+        """
+        {
+          "leader": "00135nam a2200073 i 4500",
+          "fields": [
+            {
+              "001": "instance-001"
+            },
+            {
+              "500": {
+                "subfields": [
+                  {
+                    "a": "General note to be suppressed"
+                  }
+                ],
+                "ind1": " ",
+                "ind2": " "
+              }
+            },
+            {
+              "999": {
+                "subfields": [
+                  {
+                    "s": "System field to be suppressed"
+                  }
+                ],
+                "ind1": "f",
+                "ind2": "f"
+              }
+            }
+          ]
+        }""";
+    List<VariableField> additionalFields = Collections.emptyList();
+    var isUtf = true;
+    // When
+    var actualOutputStream =
+        jsonToMarcConverter.convertJsonRecordToMarcRecord(
+            jsonRecord, additionalFields, mappingProfile, isUtf);
+    // Then
+    var actualBytes = actualOutputStream.toByteArray();
+    assertThat(actualBytes[actualBytes.length - 1]).isEqualTo((byte) 0x1D);
+    try (var is = new java.io.ByteArrayInputStream(actualBytes)) {
+      var reader = new org.marc4j.MarcStreamReader(is);
+      assertThat(reader.hasNext()).isTrue();
+      var r = reader.next();
+      // Verify 001 exists
+      assertThat(r.getControlNumber()).isEqualTo("instance-001");
+      // Verify 500 is suppressed
+      assertThat(r.getVariableFields("500")).isEmpty();
+      // Verify 999 ff is suppressed
+      var fields999 = r.getDataFields().stream().filter(f -> "999".equals(f.getTag())).toList();
+      boolean has999ff =
+          fields999.stream().anyMatch(f -> f.getIndicator1() == 'f' && f.getIndicator2() == 'f');
+      assertThat(has999ff).isFalse();
+    }
+  }
+
+  @Test
+  @TestMate(name = "TestMate-37ffb05be40b0e42aa4e8477ab7cd738")
+  void testConvertJsonRecordToMarcRecordWhenJsonHasMultipleRecordsShouldProcessAll()
+      throws IOException {
+    // Given
+    var jsonToMarcConverter = new JsonToMarcConverter();
+    var mappingProfile = new MappingProfile();
+    List<VariableField> additionalFields = Collections.emptyList();
+    var isUtf = true;
+    // MarcJsonReader expects a stream of JSON objects, not a JSON array.
+    // Removing the outer brackets and the separating comma to provide sequential JSON objects.
+    var jsonRecord =
+        """
+        {
+          "leader": "00080nam a2200049   4500",
+          "fields": [
+            {
+              "001": "rec-001"
+            }
+          ]
+        }
+        {
+          "leader": "00080nam a2200049   4500",
+          "fields": [
+            {
+              "001": "rec-002"
+            }
+          ]
+        }""";
+    // When
+    var actualOutputStream =
+        jsonToMarcConverter.convertJsonRecordToMarcRecord(
+            jsonRecord, additionalFields, mappingProfile, isUtf);
+    // Then
+    var actualBytes = actualOutputStream.toByteArray();
+    assertThat(actualBytes).isNotEmpty();
+    assertThat(actualBytes[actualBytes.length - 1]).isEqualTo((byte) 0x1D);
+    try (var bais = new ByteArrayInputStream(actualBytes)) {
+      var reader = new MarcStreamReader(bais);
+      int recordCount = 0;
+      while (reader.hasNext()) {
+        var r = reader.next();
+        recordCount++;
+        if (recordCount == 1) {
+          assertThat(r.getControlNumber()).isEqualTo("rec-001");
+        } else if (recordCount == 2) {
+          assertThat(r.getControlNumber()).isEqualTo("rec-002");
+        }
+      }
+      assertThat(recordCount).isEqualTo(2);
+    }
+  }
+
+  @Test
+  @TestMate(name = "TestMate-b53d21e418ef1468b91aba1ded659556")
+  void testConvertJsonRecordToMarcRecordWhenAdditionalFieldsEmptyShouldHandleGracefully()
+      throws IOException {
+    // Given
+    var jsonToMarcConverter = new JsonToMarcConverter();
+    var mappingProfile = new MappingProfile();
+    List<VariableField> additionalFields = null;
+    var isUtf = true;
+    var jsonRecord =
+        """
+        {
+          "leader": "00080nam a2200049   4500",
+          "fields": [
+            {
+              "001": "original-id"
+            }
+          ]
+        }""";
+    // When
+    var actualOutputStream =
+        jsonToMarcConverter.convertJsonRecordToMarcRecord(
+            jsonRecord, additionalFields, mappingProfile, isUtf);
+    // Then
+    var actualBytes = actualOutputStream.toByteArray();
+    assertThat(actualBytes).isNotEmpty();
+    assertThat(actualBytes[actualBytes.length - 1]).isEqualTo((byte) 0x1D);
+    try (var bais = new ByteArrayInputStream(actualBytes)) {
+      var reader = new MarcStreamReader(bais);
+      assertThat(reader.hasNext()).isTrue();
+      var r = reader.next();
+      assertEquals("original-id", r.getControlNumber());
+      assertEquals(1, r.getVariableFields().size());
+    }
   }
 }
