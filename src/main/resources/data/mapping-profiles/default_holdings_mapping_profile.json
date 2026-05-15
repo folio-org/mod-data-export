@@ -1,6 +1,7 @@
 {
   "id": "1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13",
   "name": "Default holdings mapping profile",
+  "default" : true,
   "description": "Default mapping profile for MARC for holdings record",
   "recordTypes": [
     "HOLDINGS"

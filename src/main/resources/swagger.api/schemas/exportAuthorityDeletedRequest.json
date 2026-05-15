@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data to start export deleted authority records process",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "offset": {
+      "description": "Skip over a number of elements by specifying an offset value for the query.",
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "limit": {
+      "description": "Limit the number of elements returned in the response.",
+      "type": "integer",
+      "default": 100,
+      "minimum": 0,
+      "maximum": 2000
+    },
+    "query": {
+      "description": "A query expressed as a CQL string",
+      "type": "string"
+    }
+  }
+}

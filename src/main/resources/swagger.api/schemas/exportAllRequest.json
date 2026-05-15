@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data to start export all process",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jobProfileId": {
+      "description": "Related Job profile id",
+      "type": "string",
+      "format": "uuid"
+    },
+    "idType": {
+      "description": "Type of provided uuids",
+      "type": "string",
+      "enum": [
+        "instance",
+        "holding",
+        "authority"
+      ],
+      "default": "instance"
+    },
+    "deletedRecords": {
+      "description": "True if need to include deleted records, otherwise false",
+      "type": "boolean",
+      "default": true
+    },
+    "suppressedFromDiscovery": {
+      "description": "True if need to include suppressed from discovery records, otherwise false",
+      "type": "boolean",
+      "default": false
+    },
+    "metadata": {
+      "description": "Meta information ",
+      "type": "object",
+      "$ref": "metadata.json"
+    }
+  }
+}

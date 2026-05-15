@@ -1,8 +1,8 @@
 [
   {
-    "id": "instance.leader",
+    "id": "instance.leader17-19",
     "field": "leader",
-    "description": "Leader",
+    "description": "Leader 17-19 positions",
     "dataSources": [
       {
         "translation": {
@@ -15,6 +15,21 @@
         }
       }
     ]
+  },
+  {
+    "id": "instance.leader05",
+    "field": "leader",
+    "description": "Leader 05 position",
+    "dataSources": [
+      {
+        "translation": {
+          "function": "set_status_deleted"
+        }
+      }
+    ],
+    "metadata": {
+      "deleted": "$.instance.deleted"
+    }
   },
   {
     "id": "instance.hrid",
@@ -141,7 +156,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "set_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "ISBN"
           }
@@ -151,9 +166,8 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISBN",
             "type": "Invalid ISBN"
           }
         }
@@ -190,7 +204,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "set_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "ISSN"
           }
@@ -198,11 +212,10 @@
       },
       {
         "from": "$.instance.identifiers[*].value",
-        "subfield": "i",
+        "subfield": "l",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISSN",
             "type": "Linking ISSN"
           }
         }
@@ -211,9 +224,8 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISSN",
             "type": "Invalid ISSN"
           }
         }
@@ -1044,7 +1056,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "set_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "GPO item number"
           }
@@ -1054,9 +1066,8 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "GPO item number",
             "type": "Cancelled GPO item number"
           }
         }
@@ -1602,7 +1613,7 @@
     "description": "Series",
     "dataSources": [
       {
-        "from": "$.instance.series",
+        "from": "$.instance.series[*].value",
         "subfield": "a"
       },
       {
@@ -1660,7 +1671,7 @@
     "description": "Physical Descriptions",
     "dataSources": [
       {
-        "from": "$.instance.subjects",
+        "from": "$.instance.subjects[*].value",
         "subfield": "a"
       },
       {
@@ -1830,6 +1841,76 @@
     }
   },
   {
+    "id": "instance.preceding.title",
+    "field": "780",
+    "description": "Instance preceding title",
+    "dataSources": [
+      {
+        "from": "$.instance.precedingTitles[*].precedingInstanceId",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "id": "$.instance.succeedingTitles[*].id",
+      "title": "$.instance.succeedingTitles[*].title",
+      "hrid": "$.instance.succeedingTitles[*].hrid",
+      "identifiers": "$.instance.identifiers[*]"
+    }
+  },
+  {
+    "id": "instance.succeeding.title",
+    "field": "785",
+    "description": "Instance succeeding title",
+    "dataSources": [
+      {
+        "from": "$.instance.succeedingTitles[*].succeedingInstanceId",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "id": "$.instance.succeedingTitles[*].id",
+      "title": "$.instance.succeedingTitles[*].title",
+      "hrid": "$.instance.succeedingTitles[*].hrid",
+      "identifiers": "$.instance.identifiers[*]"
+    }
+  },
+  {
     "id": "instance.electronic.access",
     "field": "856",
     "description": "Electronic access",
@@ -1864,9 +1945,13 @@
         "translation": {
           "function": "set_electronic_access_indicator",
           "parameters": {
+            "No information provided": " ",
             "Resource": "0",
             "Version of resource": "1",
-            "Related resource": "2"
+            "Related resource": "2",
+            "Component part(s) of resource": "3",
+            "Version of component part(s) of resource": "4",
+            "No display constant generated": "8"
           }
         }
       }

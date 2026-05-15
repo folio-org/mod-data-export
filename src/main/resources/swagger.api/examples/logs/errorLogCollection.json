@@ -1,0 +1,26 @@
+{
+    "errorLogs": [
+        {
+            "id": "de55d20e-4daf-49bf-8bf0-ae7eada8b80c",
+            "jobExecutionId": "67dfac11-1caf-4470-9ad1-d533f6360bdd",
+            "createdDate": "2019-07-22T11:22:07Z",
+            "logLevel": "ERROR",
+            "reason": 200,
+            "affectedRecords": [{
+                "id": "57c79d87-6510-4354-b212-96832fbf3fa1",
+                "hrid": "200",
+                "title": "Record title",
+                "recordType": "INSTANCE"
+            }],
+            "metadata": {
+                "createdDate": "2019-09-15T11:22:07Z",
+                "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+                "createdByUsername": "janedoeuser",
+                "updatedDate": "2019-09-15T13:28:54Z",
+                "updatedByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+                "updatedByUsername": ""
+            }
+        }
+    ],
+    "totalRecords": "1"
+}

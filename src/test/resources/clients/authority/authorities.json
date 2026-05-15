@@ -1,0 +1,38 @@
+{
+  "authorities": [
+    {
+      "id": "f31a36de-fcf8-44f9-87ef-a55d06ad21ae",
+      "_version": 0,
+      "source": "CONSORTIUM-MARC",
+      "personalName": "Mescudi, Scott, 1984-",
+      "saftPersonalName": [
+        "Kid Cudi, 1984-"
+      ],
+      "subjectHeadings": "a",
+      "identifiers": [
+        {
+          "value": "10621156",
+          "identifierTypeId": "5d164f4b-0b15-4e42-ae75-cfcf85318ad9"
+        },
+        {
+          "value": "no2017157670",
+          "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+        },
+        {
+          "value": "(OCoLC)oca11090651",
+          "identifierTypeId": "7e591197-f335-4afb-bc6d-a6d76ca3bace"
+        }
+      ],
+      "notes": [],
+      "sourceFileId": "af045f2f-e851-4613-984c-4bc13430454a",
+      "naturalId": "no2017157670",
+      "metadata": {
+        "createdDate": "2023-10-02T07:00:35.159393Z",
+        "createdByUserId": "fd464268-2616-5fc2-839f-0e78c8ae7f71",
+        "updatedDate": "2023-10-02T07:00:35.159393Z",
+        "updatedByUserId": "fd464268-2616-5fc2-839f-0e78c8ae7f71"
+      }
+    }
+  ],
+  "totalRecords": 1
+}

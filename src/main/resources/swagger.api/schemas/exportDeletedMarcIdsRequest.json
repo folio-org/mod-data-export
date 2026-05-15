@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data to start export deleted MARC IDs process",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "from": {
+      "description": "Starting date to search deleted",
+      "type": "string",
+      "format": "date"
+    },
+    "to": {
+      "description": "Ending date to search deleted",
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

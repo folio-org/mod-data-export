@@ -1,26 +1,26 @@
 {
-  "id": "${artifactId}-${version}",
+  "id": "@artifactId@-@version@",
   "name": "Data Export Module",
   "requires": [
     {
       "id": "source-storage-source-records",
-      "version": "3.0"
+      "version": "3.2"
     },
     {
       "id": "users",
-      "version": "15.3"
+      "version": "15.3 16.0"
     },
     {
       "id": "instance-storage",
-      "version": "7.7 8.0"
+      "version": "7.7 8.0 9.0 10.0 11.0"
     },
     {
       "id": "holdings-storage",
-      "version": "4.5 5.0"
+      "version": "4.5 5.0 6.0 7.0 8.0"
     },
     {
       "id": "item-storage",
-      "version": "8.9 9.0"
+      "version": "8.9 9.0 10.0 11.0"
     },
     {
       "id": "nature-of-content-terms",
@@ -31,7 +31,7 @@
       "version": "1.2"
     },
     {
-     "id": "contributor-name-types",
+      "id": "contributor-name-types",
       "version": "1.2"
     },
     {
@@ -55,10 +55,6 @@
       "version": "2.0"
     },
     {
-      "id": "configuration",
-      "version": "2.0"
-    },
-    {
       "id": "electronic-access-relationships",
       "version": "1.0"
     },
@@ -75,6 +71,30 @@
       "version": "1.0"
     },
     {
+      "id": "alternative-title-types",
+      "version": "1.0"
+    },
+    {
+      "id": "authority-storage",
+      "version": "2.2"
+    },
+    {
+      "id": "loan-types",
+      "version": "2.3"
+    },
+    {
+      "id": "user-tenants",
+      "version": "1.0"
+    },
+    {
+      "id": "source-storage-stream",
+      "version": "1.2"
+    },
+    {
+      "id": "resource-ids-streaming",
+      "version": "1.0"
+    },
+    {
       "id": "call-number-types",
       "version": "1.0"
     },
@@ -83,14 +103,40 @@
       "version": "1.0"
     },
     {
-      "id": "search",
-      "version": "0.6"
+      "id": "consortium-search",
+      "version": "2.1"
+    },
+    {
+      "id": "permissions",
+      "version": "5.6"
+    },
+    {
+      "id": "base-url",
+      "version": "1.0"
+    }
+  ],
+  "optional": [
+    {
+      "id": "consortia",
+      "version": "1.1"
+    },
+    {
+      "id": "permissions-users",
+      "version": "1.0"
+    },
+    {
+      "id": "users-keycloak",
+      "version": "1.0"
+    },
+    {
+      "id": "fqm-query",
+      "version": "1.0 2.0"
     }
   ],
   "provides": [
     {
       "id": "data-export",
-      "version": "5.0",
+      "version": "5.4",
       "handlers": [
         {
           "methods": [
@@ -102,11 +148,10 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "source-storage.sourceRecords.get",
+            "source-storage.stream.marc-record-identifiers.collection.post",
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
-            "configuration.entries.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
@@ -121,7 +166,20 @@
             "inventory-storage.electronic-access-relationships.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
-            "inventory-storage.call-number-types.collection.get"
+            "inventory-storage.call-number-types.collection.get",
+            "inventory-storage.alternative-title-types.collection.get",
+            "inventory-storage.modes-of-issuance.collection.get",
+            "user-tenants.collection.get",
+            "search.resources.ids.jobs.post",
+            "search.resources.ids.collection.get",
+            "search.resources.ids.jobs.get",
+            "consortium-search.holdings.collection.get",
+            "consortia.user-tenants.collection.get",
+            "consortium-search.holdings.item.get",
+            "perms.users.get",
+            "permissions.users.item.get",
+            "fqm.query.async.results.post",
+            "base-url.item.get"
           ]
         },
         {
@@ -138,7 +196,6 @@
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
-            "configuration.entries.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
@@ -153,7 +210,13 @@
             "inventory-storage.electronic-access-relationships.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
-            "inventory-storage.call-number-types.collection.get"
+            "inventory-storage.call-number-types.collection.get",
+            "user-tenants.collection.get",
+            "consortium-search.holdings.collection.get",
+            "consortia.user-tenants.collection.get",
+            "consortium-search.holdings.item.get",
+            "perms.users.get",
+            "permissions.users.item.get"
           ]
         },
         {
@@ -187,8 +250,7 @@
             "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
-            "inventory-storage.record-bulk.ids.get",
-            "search.instances.ids.collection.get"
+            "inventory-storage.record-bulk.ids.get"
           ]
         },
         {
@@ -232,6 +294,9 @@
           "permissionsRequired": [
             "data-export.job-profiles.item.post"
           ],
+          "permissionsDesired": [
+            "data-export.job-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
@@ -266,6 +331,9 @@
           "permissionsRequired": [
             "data-export.job-profiles.item.put"
           ],
+          "permissionsDesired": [
+            "data-export.job-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
@@ -288,6 +356,9 @@
           "pathPattern": "/data-export/mapping-profiles",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.post"
+          ],
+          "permissionsDesired": [
+            "data-export.mapping-profiles.item.lock.execute"
           ],
           "modulePermissions": [
             "users.item.get"
@@ -323,6 +394,9 @@
           "permissionsRequired": [
             "data-export.mapping-profiles.item.put"
           ],
+          "permissionsDesired": [
+            "data-export.mapping-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
@@ -352,7 +426,9 @@
             "inventory-storage.contributor-name-types.collection.get",
             "inventory-storage.electronic-access-relationships.collection.get",
             "inventory-storage.instance-types.collection.get",
-            "inventory-storage.modes-of-issuance.collection.get"
+            "inventory-storage.modes-of-issuance.collection.get",
+            "inventory-storage.holdings-note-types.collection.get",
+            "inventory-storage.item-note-types.collection.get"
           ]
         },
         {
@@ -387,6 +463,77 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/configuration",
+          "permissionsRequired": [
+            "data-export.configuration.post"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-all",
+          "permissionsRequired": [
+            "data-export.export.all"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/related-users",
+          "permissionsRequired": [
+            "data-export.related-users.collection.get"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-deleted",
+          "permissionsRequired": [
+            "data-export.export-deleted.post"
+          ],
+          "modulePermissions": [
+            "user-tenants.collection.get",
+            "consortia.user-tenants.collection.get"
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-authority-deleted",
+          "permissionsRequired": [
+            "data-export.export-authority-deleted.post"
+          ],
+          "modulePermissions": [
+            "inventory-storage.authorities.collection.get",
+            "user-tenants.collection.get"
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/download-record/{recordId}",
+          "permissionsRequired": [
+            "data-export.download-record.item.get"
+          ],
+          "modulePermissions": [
+
+          ]
         }
       ]
     },
@@ -399,7 +546,11 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/_/tenant"
+          "pathPattern": "/_/tenant",
+          "modulePermissions": [
+            "base-url.item.get",
+            "okapi.proxy.self.timers.patch"
+          ]
         },
         {
           "methods": [
@@ -432,7 +583,7 @@
           "modulePermissions": [
           ],
           "unit": "hour",
-          "delay": "1"
+          "delay": "24"
         }
       ]
     }
@@ -538,6 +689,11 @@
       "description": "Entry point to stop freezing job executions"
     },
     {
+      "permissionName": "data-export.mapping-profiles.item.lock.execute",
+      "displayName": "Data Export - lock mapping profile",
+      "description": "To lock mapping profile"
+    },
+    {
       "permissionName": "data-export.logs.collection.get",
       "displayName": "Data Export - get error logs collection",
       "description": "Entry point to get error logs by job execution id"
@@ -546,6 +702,41 @@
       "permissionName": "data-export.clean-up-files.post",
       "displayName": "Data Export - call to clean up file definitions and related files",
       "description": "Entry point to start clean up process of file definitions and related files"
+    },
+    {
+      "permissionName": "data-export.configuration.post",
+      "displayName": "Data Export - add or update data export configuration",
+      "description": "Entry point to add or update configuration using key/value pair"
+    },
+    {
+      "permissionName": "data-export.export.all",
+      "displayName": "Data Export - export all records",
+      "description": "Entry point to export all records of the specific type"
+    },
+    {
+      "permissionName": "data-export.related-users.collection.get",
+      "displayName": "Data Export - related users",
+      "description": "To return only users which executed export"
+    },
+    {
+      "permissionName": "data-export.export-deleted.post",
+      "displayName": "Data Export - deleted MARC IDs",
+      "description": "To return deleted MARC IDs"
+    },
+    {
+      "permissionName": "data-export.export-authority-deleted.post",
+      "displayName": "Data Export - deleted authorities",
+      "description": "To return deleted authorities"
+    },
+    {
+      "permissionName": "data-export.download-record.item.get",
+      "displayName": "Data Export - download record",
+      "description": "Entry point to download single record file in the specified format"
+    },
+    {
+      "permissionName": "data-export.job-profiles.item.lock.execute",
+      "displayName": "Data Export - permission to lock job profile",
+      "description": "To lock job profile"
     },
     {
       "permissionName": "data-export.all",
@@ -573,7 +764,17 @@
         "data-export.expire-jobs.post",
         "data-export.logs.collection.get",
         "data-export.clean-up-files.post",
-        "data-export.quick.export.post"
+        "data-export.quick.export.post",
+        "data-export.configuration.post",
+        "data-export.export.all",
+        "data-export.related-users.collection.get",
+        "data-export.export-deleted.post",
+        "data-export.export-authority-deleted.post",
+        "data-export.download-record.item.get",
+        "perms.users.get",
+        "permissions.users.item.get",
+        "data-export.job-profiles.item.lock.execute",
+        "data-export.mapping-profiles.item.lock.execute"
       ],
       "visible": false
     }
@@ -598,7 +799,7 @@
       { "name": "DB_DATABASE", "value": "okapi_modules" },
       { "name": "DB_QUERYTIMEOUT", "value": "60000" },
       { "name": "DB_CHARSET", "value": "UTF-8" },
-      { "name": "DB_MAXPOOLSIZE", "value": "5" }
+      { "name": "DB_MAXPOOLSIZE", "value": "10" }
     ]
   }
 }

@@ -1,0 +1,2 @@
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS locked_by UUID;
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS locked_at TIMESTAMP;

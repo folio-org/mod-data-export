@@ -1,0 +1,883 @@
+package org.folio.dataexp.service.export.strategies;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
+import static org.folio.dataexp.service.export.strategies.InstancesExportStrategy.INSTANCE_MARC_TYPE;
+import static org.folio.dataexp.util.Constants.MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID;
+import static org.folio.dataexp.util.Constants.STATE_ACTUAL;
+import static org.folio.dataexp.util.Constants.STATE_DELETED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import jakarta.persistence.EntityManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import net.minidev.json.JSONObject;
+import org.folio.dataexp.TestMate;
+import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.domain.entity.InstanceEntity;
+import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
+import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.exception.TransformationRuleException;
+import org.folio.dataexp.exception.export.DownloadRecordException;
+import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
+import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
+import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.repository.MarcInstanceRecordRepository;
+import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
+import org.folio.processor.RuleProcessor;
+import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.processor.rule.Rule;
+import org.folio.reader.EntityReader;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.writer.RecordWriter;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.marc4j.MarcException;
+import org.marc4j.marc.impl.DataFieldImpl;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class InstancesExportStrategyTest {
+
+  @Mock private ConsortiaService consortiaService;
+  @Mock private InstanceCentralTenantRepository instanceCentralTenantRepository;
+  @Mock private MarcInstanceRecordRepository marcInstanceRecordRepository;
+  @Mock private MarcRecordEntityRepository marcRecordEntityRepository;
+  @Mock private InstanceEntityRepository instanceEntityRepository;
+  @Mock private InstanceWithHridEntityRepository instanceWithHridEntityRepository;
+  @Mock private RuleProcessor ruleProcessor;
+  @Mock private RuleFactory ruleFactory;
+  @Mock private ReferenceDataProvider referenceDataProvider;
+  @Mock private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  @Mock private ItemEntityRepository itemEntityRepository;
+  @Mock private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock private EntityManager entityManager;
+  @Mock private ErrorLogService errorLogService;
+  @Mock private HoldingsItemsResolverService holdingsItemsResolverService;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private FolioModuleMetadata folioModuleMetadata;
+  @Spy private RuleHandler ruleHandler;
+
+  @Captor private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;
+
+  @InjectMocks private InstancesExportStrategy instancesExportStrategy;
+
+  private Map<String, Collection<String>> headers = new HashMap<>();
+
+  @BeforeEach
+  void setUp() {
+    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
+    instancesExportStrategy.errorLogService = errorLogService;
+    instancesExportStrategy.entityManager = entityManager;
+    instancesExportStrategy.folioExecutionContext = folioExecutionContext;
+    instancesExportStrategy.setInstanceEntityRepository(instanceEntityRepository);
+    instancesExportStrategy.setMappingProfileEntityRepository(mappingProfileEntityRepository);
+  }
+
+  private JSONObject createInstanceJsonObject(UUID instanceId) {
+    var instanceJson = new JSONObject();
+    instanceJson.put("id", instanceId.toString());
+    var wrapper = new JSONObject();
+    wrapper.put(INSTANCE_KEY, instanceJson);
+    return wrapper;
+  }
+
+  @Test
+  void getMarcRecordsTest() {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(true);
+
+    var marcRecord = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
+
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            anySet(), anyString(), anySet()))
+        .thenReturn(new ArrayList<>(List.of(marcRecord)));
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
+    when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(eq("central"), anySet()))
+        .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
+
+    var actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    assertEquals(2, actualMarcRecords.size());
+
+    mappingProfile.setDefault(false);
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
+
+    actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    assertEquals(2, actualMarcRecords.size());
+  }
+
+  @Test
+  void getMarcRecordsIfMappingProfileNotDefaultAndRecordsTypeNotSrsTest() {
+    var mappingProfile = new MappingProfile();
+    var marcRecord = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
+
+    var actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    assertEquals(0, actualMarcRecords.size());
+  }
+
+  @Test
+  void getIdentifierMessageTest() {
+    var instance = "{'id' : 'uuid', 'title' : 'title', 'hrid' : '123'}";
+    var instanceRecordEntity =
+        InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceRecordEntity));
+
+    var opt = instancesExportStrategy.getIdentifiers(UUID.randomUUID());
+
+    assertTrue(opt.isPresent());
+    assertEquals("Instance with HRID: 123", opt.get().getIdentifierHridMessage());
+
+    assertEquals("uuid", opt.get().getAssociatedJsonObject().getAsString("id"));
+    assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
+    assertEquals("123", opt.get().getAssociatedJsonObject().getAsString("hrid"));
+  }
+
+  @Test
+  void getIdentifierMessageIfInstanceDoesNotExistTest() {
+    var instanceId = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
+
+    var opt = instancesExportStrategy.getIdentifiers(instanceId);
+
+    assertTrue(opt.isPresent());
+    assertEquals(
+        "Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e",
+        opt.get().getIdentifierHridMessage());
+  }
+
+  @Test
+  void getGeneratedMarcTest() throws TransformationRuleException {
+    var transformation = new Transformations();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
+
+    var defaultMappingProfile = new MappingProfile();
+    defaultMappingProfile.setDefault(true);
+    defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var defaultMappingProfileEntity =
+        MappingProfileEntity.builder()
+            .mappingProfile(defaultMappingProfile)
+            .id(defaultMappingProfile.getId())
+            .build();
+
+    var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
+
+    when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(defaultMappingProfileEntity);
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId()))
+        .thenReturn(defaultMappingProfileEntity);
+    doNothing().when(instancesExportStrategy.entityManager).clear();
+    instancesExportStrategy.getGeneratedMarc(
+        new HashSet<>(),
+        mappingProfile,
+        new ExportRequest(),
+        UUID.randomUUID(),
+        new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+
+    verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
+
+    verify(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+
+    var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
+    assertTrue(actualMappingProfile.getDefault());
+    assertEquals(3, actualMappingProfile.getRecordTypes().size());
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
+    assertEquals(1, actualMappingProfile.getTransformations().size());
+  }
+
+  @Test
+  void getGeneratedMarcIfMarcExceptionTest() throws TransformationRuleException {
+    var transformation = new Transformations();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
+
+    var defaultMappingProfile = new MappingProfile();
+    defaultMappingProfile.setDefault(true);
+    defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var defaultMappingProfileEntity =
+        MappingProfileEntity.builder()
+            .mappingProfile(defaultMappingProfile)
+            .id(defaultMappingProfile.getId())
+            .build();
+
+    var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
+
+    when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(defaultMappingProfileEntity);
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId()))
+        .thenReturn(defaultMappingProfileEntity);
+    doThrow(new MarcException())
+        .when(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+
+    var generatedMarcResult =
+        instancesExportStrategy.getGeneratedMarc(
+            new HashSet<>(),
+            mappingProfile,
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+    verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
+    verify(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class), isA(String.class), any(), isA(MarcException.class));
+
+    var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
+    assertTrue(actualMappingProfile.getDefault());
+    assertEquals(3, actualMappingProfile.getRecordTypes().size());
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
+    assertEquals(1, actualMappingProfile.getTransformations().size());
+  }
+
+  @Test
+  void getInstancesWithHoldingsAndItemsTest() {
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    doNothing().when(instancesExportStrategy.entityManager).clear();
+
+    var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
+    var instancesWithHoldingsAndItems =
+        instancesExportStrategy.getInstancesWithHoldingsAndItems(
+            new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
+
+    verify(holdingsItemsResolverService)
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
+
+    assertEquals(1, instancesWithHoldingsAndItems.size());
+
+    var jsonObject = instancesWithHoldingsAndItems.get(0);
+    var instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
+    assertEquals("instHrid", instanceJson.get(HRID_KEY));
+
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+    assertEquals(notExistId, generatedMarcResult.getFailedIds().get(0));
+    assertEquals(1, generatedMarcResult.getNotExistIds().size());
+    assertEquals(notExistId, generatedMarcResult.getFailedIds().get(0));
+  }
+
+  @Test
+  void getInstancesWithHoldingsAndItemsIfCentralTenantExistTest() {
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
+    var instanceFromCentralTenant =
+        "{'id' : '0eaa0eef-0000-0c0e-af00-000000ebc576', 'hrid' : 'instCentralHrid'}";
+    var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
+    var instanceEntityFromCentralTenant =
+        InstanceEntity.builder().jsonb(instanceFromCentralTenant).id(notExistId).build();
+    when(instanceCentralTenantRepository.findInstancesByIdIn("central", Set.of(notExistId)))
+        .thenReturn(List.of(instanceEntityFromCentralTenant));
+
+    var instancesWithHoldingsAndItems =
+        instancesExportStrategy.getInstancesWithHoldingsAndItems(
+            new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
+
+    verify(holdingsItemsResolverService)
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
+    assertEquals(2, instancesWithHoldingsAndItems.size());
+
+    var jsonObject = instancesWithHoldingsAndItems.get(0);
+    var instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
+    assertEquals("instHrid", instanceJson.get(HRID_KEY));
+
+    jsonObject = instancesWithHoldingsAndItems.get(1);
+    instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
+    assertEquals("instCentralHrid", instanceJson.get(HRID_KEY));
+
+    assertEquals(0, generatedMarcResult.getFailedIds().size());
+    assertEquals(0, generatedMarcResult.getNotExistIds().size());
+  }
+
+  @Test
+  void getHoldingsWithInstanceAndItemsIfErrorConvertingInstanceToJsonTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var invalidInstanceJson = "{'id'  '1eaa1eef-1633-4c7e-af09-796315ebc576' 'hrid'  'instHrid'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(invalidInstanceJson).id(instanceId).build();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    doNothing().when(instancesExportStrategy.entityManager).clear();
+
+    var instancesWithHoldingsAndItems =
+        instancesExportStrategy.getInstancesWithHoldingsAndItems(
+            new HashSet<>(Set.of(instanceId)), generatedMarcResult, mappingProfile);
+
+    assertEquals(0, instancesWithHoldingsAndItems.size());
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+
+    verify(errorLogService)
+        .saveGeneralError(
+            "Error converting to json instance by id 1eaa1eef-1633-4c7e-af09-796315ebc576",
+            jobExecutionId);
+  }
+
+  @Test
+  void getAdditionalMarcFieldsByExternalIdTest() throws TransformationRuleException {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
+    var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var instanceHridEntity =
+        InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
+    var variableField = new DataFieldImpl("tag", 'a', 'b');
+
+    when(instanceWithHridEntityRepository.findByIdIn(anySet()))
+        .thenReturn(List.of(instanceHridEntity));
+    when(holdingsItemsResolverService.isNeedUpdateWithHoldingsOrItems(isA(MappingProfile.class)))
+        .thenReturn(true);
+    doNothing()
+        .when(holdingsItemsResolverService)
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
+    when(ruleProcessor.processFields(any(), any(), any(), anyList(), any()))
+        .thenReturn(List.of(variableField));
+
+    var marcFieldsByExternalId =
+        instancesExportStrategy.getAdditionalMarcFieldsByExternalId(
+            List.of(marcRecord), mappingProfile, UUID.randomUUID());
+
+    verify(holdingsItemsResolverService)
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
+    assertNotNull(marcFieldsByExternalId);
+
+    var actualMarcField = marcFieldsByExternalId.get(instanceId);
+
+    assertEquals("tag ab", actualMarcField.getHoldingItemsFields().get(0).toString());
+  }
+
+  @Test
+  void saveConvertJsonRecordToMarcRecordErrorIfNotRecordLongErrorTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var instance =
+        "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid', 'title' : 'title'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var errorMessage = "error message";
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
+
+    var expectedErrorMessage =
+        "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";
+    verify(errorLogService).saveGeneralError(expectedErrorMessage, jobExecutionId);
+  }
+
+  @Test
+  void saveConvertJsonRecordToMarcRecordErrorIfErrorRecordTooLongTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var instance =
+        "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid', 'title' : 'title'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var errorMessage =
+        "Record is too long to be a valid MARC binary record, it's length would be 113937 which"
+            + " is more than 99999 bytes 2024";
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
+  }
+
+  @Test
+  void shouldGetInstancesFromCentralTenantWhenInstancesDeletedInMemberTenant() {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(true);
+
+    var externalId = UUID.randomUUID();
+    var marcRecord = MarcRecordEntity.builder().externalId(externalId).state(STATE_DELETED).build();
+    var sharedMarcRecord =
+        MarcRecordEntity.builder().externalId(externalId).state(STATE_ACTUAL).build();
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            anySet(), anyString(), anySet()))
+        .thenReturn(new ArrayList<>(List.of(marcRecord)))
+        .thenReturn(new ArrayList<>(List.of(sharedMarcRecord)));
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+
+    when(consortiaService.isCurrentTenantCentralTenant(anyString())).thenReturn(false);
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
+    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(eq("central"), anySet()))
+        .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
+
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
+    var actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    assertEquals(2, actualMarcRecords.size());
+    assertEquals(STATE_ACTUAL, actualMarcRecords.getFirst().getState());
+  }
+
+  @Test
+  void getMarcRecordShouldSearchInstanceInCentralTenantWhenNotFoundInMember() {
+    var externalId = UUID.randomUUID();
+    var consortiumEntity =
+        new MarcRecordEntity().withExternalId(externalId).withState(STATE_ACTUAL);
+
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
+        .thenReturn(Collections.emptyList());
+    when(marcInstanceRecordRepository.findByExternalIdIn("central", Set.of(externalId)))
+        .thenReturn(Collections.singletonList(consortiumEntity));
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+
+    var res = instancesExportStrategy.getMarcRecord(externalId);
+
+    verify(consortiaService).getCentralTenantId(anyString());
+    assertThat(res.getState()).isEqualTo(STATE_ACTUAL);
+  }
+
+  @Test
+  void getMarcRecordShouldShouldTrowWhenInstanceWasNotFound() {
+    var externalId = UUID.randomUUID();
+
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
+        .thenReturn(Collections.emptyList());
+    when(marcInstanceRecordRepository.findByExternalIdIn("central", Set.of(externalId)))
+        .thenReturn(Collections.emptyList());
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+
+    var throwable =
+        assertThrows(
+            DownloadRecordException.class, () -> instancesExportStrategy.getMarcRecord(externalId));
+
+    var expectedMessage = MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID.formatted(externalId);
+    assertEquals(expectedMessage, throwable.getMessage());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-841146211b9ca7eeca81dc869415b8c6")
+  void testMapToMarcShouldReturnMarcStringOnSuccessfulProcessing() {
+    // Given
+    var jsonObject = new JSONObject();
+    var instance = new JSONObject(Map.of("id", "instance-id-123"));
+    jsonObject.put("instance", instance);
+    List<Rule> initialRules = Collections.singletonList(new Rule());
+    List<Rule> preHandledRules = Collections.singletonList(new Rule());
+    var referenceDataWrapper = mock(ReferenceDataWrapper.class);
+    var expectedMarcString = "MARC_STRING_RESULT";
+    when(ruleHandler.preHandle(jsonObject, initialRules)).thenReturn(preHandledRules);
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            eq(preHandledRules),
+            any()))
+        .thenReturn(expectedMarcString);
+    // When
+    String actualMarcString =
+        instancesExportStrategy.mapToMarc(jsonObject, initialRules, referenceDataWrapper);
+    // Then
+    assertEquals(expectedMarcString, actualMarcString);
+    verify(ruleHandler).preHandle(jsonObject, initialRules);
+    ArgumentCaptor<List<Rule>> rulesCaptor = ArgumentCaptor.forClass(List.class);
+    verify(ruleProcessor)
+        .process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            rulesCaptor.capture(),
+            any());
+    assertEquals(preHandledRules, rulesCaptor.getValue());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-68fcd6830c237450604d94e78033d0b6")
+  void getGeneratedMarcShouldHandleTransformationRuleException()
+      throws TransformationRuleException {
+    // Given
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(new ArrayList<>());
+    var instancesWithHoldingsAndItems = List.of(new JSONObject());
+    var exceptionMessage = "Rule loading failed";
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenThrow(new TransformationRuleException(exceptionMessage));
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    assertThat(actualResult.getFailedIds()).isEmpty();
+    verify(errorLogService).saveGeneralError(exceptionMessage, jobExecutionId);
+    verify(ruleProcessor, never())
+        .process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-4b143260823dab546e8d870bb0e7227c")
+  void getGeneratedMarcShouldHandleDeletedInstanceWithMarcException()
+      throws TransformationRuleException {
+    // Given
+    var instanceId = UUID.randomUUID();
+    var instanceJson = new JSONObject();
+    instanceJson.put(ID_KEY, instanceId.toString());
+    instanceJson.put(DELETED_KEY, true);
+    var instanceWithHoldingsAndItems = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenReturn(Collections.singletonList(new Rule()));
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any()))
+        .thenThrow(new MarcException("Simulated MARC conversion failure"));
+    var mappingProfile = new MappingProfile();
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId);
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            eq(instanceJson),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(),
+            List.of(instanceId.toString()),
+            jobExecutionId);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-bf46c0e0482241ec3b5bd12514627f3c")
+  void getGeneratedMarcShouldProcessMultipleRecordsWithOneFailure()
+      throws TransformationRuleException {
+    // Given
+    var jobExecutionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+    var instanceId1 = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    var instanceId2 = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    var instanceId3 = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    var marcRecord1 = "MARC_RECORD_1";
+    var marcRecord3 = "MARC_RECORD_3";
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    var mappingProfile = new MappingProfile();
+    var rules = Collections.singletonList(new Rule());
+    var referenceData = mock(ReferenceDataWrapper.class);
+    var jsonObject1 = createInstanceJsonObject(instanceId1);
+    var jsonObject2 = createInstanceJsonObject(instanceId2);
+    var jsonObject3 = createInstanceJsonObject(instanceId3);
+    var instancesWithHoldingsAndItems = List.of(jsonObject1, jsonObject2, jsonObject3);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString())).thenReturn(referenceData);
+    when(ruleFactory.getRules(any(MappingProfile.class))).thenReturn(rules);
+    // Simulate mapToMarc behavior by mocking its dependencies
+    when(ruleProcessor.process(
+            any(EntityReader.class), any(RecordWriter.class), eq(referenceData), eq(rules), any()))
+        .thenReturn(marcRecord1) // First call succeeds
+        .thenThrow(new MarcException("Simulated conversion failure")) // Second call fails
+        .thenReturn(marcRecord3); // Third call succeeds
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getMarcRecords()).hasSize(2).containsExactly(marcRecord1, marcRecord3);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId2);
+    var instanceJsonCaptor = ArgumentCaptor.forClass(JSONObject.class);
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            instanceJsonCaptor.capture(),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    assertThat(instanceJsonCaptor.getValue().getAsString("id")).isEqualTo(instanceId2.toString());
+    verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-ddc0ab07e7d362837288a23dfeee311a")
+  void getGeneratedMarcShouldReturnEmptyResultForEmptyInputList()
+      throws TransformationRuleException {
+    // Given
+    var jobExecutionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    var mappingProfile = new MappingProfile();
+    var instancesWithHoldingsAndItems = new ArrayList<JSONObject>();
+    var rules = Collections.singletonList(new Rule());
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class))).thenReturn(rules);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    assertThat(actualResult.getFailedIds()).isEmpty();
+    verify(ruleProcessor, never())
+        .process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any());
+    verify(errorLogService, never()).saveGeneralError(anyString(), any(UUID.class));
+    verify(errorLogService, never())
+        .saveWithAffectedRecord(
+            any(JSONObject.class), anyString(), any(UUID.class), any(MarcException.class));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-2b7d4d323ac1e7eee2e5f07b778a2533")
+  void getGeneratedMarcShouldNotLogDeletedErrorWhenFlagIsFalse()
+      throws TransformationRuleException {
+    // Given
+    var instanceId = UUID.randomUUID();
+    var instanceJson = new JSONObject();
+    instanceJson.put(ID_KEY, instanceId.toString());
+    instanceJson.put(DELETED_KEY, false);
+    var instanceWithHoldingsAndItems = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenReturn(Collections.singletonList(new Rule()));
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any()))
+        .thenThrow(new MarcException("Simulated MARC conversion failure"));
+    var mappingProfile = new MappingProfile();
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            eq(instanceJson),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-e468d6f373889f0870d4cee0bdefaf84")
+  void getGeneratedMarcShouldNotLogDeletedErrorWhenDeletedKeyIsMissing()
+      throws TransformationRuleException {
+    // Given
+    var instanceId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+    var instanceJson = new JSONObject();
+    instanceJson.put(ID_KEY, instanceId.toString());
+    var instanceWithHoldingsAndItems = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenReturn(Collections.singletonList(new Rule()));
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any()))
+        .thenThrow(new MarcException("Simulated MARC conversion failure"));
+    var mappingProfile = new MappingProfile();
+    var jobExecutionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            eq(instanceJson),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-505932c06d2b13fe758cc6b801e170cc")
+  void testGetIdentifiersShouldHandleMissingOptionalFieldsInJson() {
+    // Given
+    var instanceId = UUID.fromString("c0a80101-0000-0000-0000-000000000001");
+    var partialJson = "{\"id\": \"c0a80101-0000-0000-0000-000000000001\"}";
+    var instanceEntity = InstanceEntity.builder().id(instanceId).jsonb(partialJson).build();
+    when(instanceEntityRepository.findByIdIn(Set.of(instanceId)))
+        .thenReturn(List.of(instanceEntity));
+    // When
+    var opt = instancesExportStrategy.getIdentifiers(instanceId);
+    // Then
+    assertTrue(opt.isPresent());
+    var exportIdentifiers = opt.get();
+    assertThat(exportIdentifiers.getIdentifierHridMessage()).isEqualTo("Instance with HRID: null");
+    var associatedJson = exportIdentifiers.getAssociatedJsonObject();
+    assertThat(associatedJson.getAsString(ErrorLogService.ID)).isEqualTo(instanceId.toString());
+    assertThat(associatedJson.get(ErrorLogService.HRID)).isNull();
+    assertThat(associatedJson.get(ErrorLogService.TITLE)).isNull();
+    verify(instanceEntityRepository).findByIdIn(Set.of(instanceId));
+  }
+}

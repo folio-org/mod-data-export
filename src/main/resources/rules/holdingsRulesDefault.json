@@ -11,30 +11,11 @@
   },
   {
     "id": "holdings.instancehrid",
-    "field": "014",
+    "field": "004",
     "description": "Unique hrId of the related instance record",
     "dataSources": [
       {
-        "from": "$.holdings[*].instanceHrId",
-        "subfield": "a"
-      },
-      {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "1"
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
+        "from": "$.holdings[*].instanceHrId"
       }
     ]
   },
@@ -74,13 +55,16 @@
     }
   },
   {
-    "id": "holdings.holdingsstatements.statement",
-    "field": "866",
-    "description": "Holdings statement",
+    "id": "holdings.temporary.location",
+    "field": "852",
+    "description": "Holdings temporary location",
     "dataSources": [
       {
-        "from": "$.holdings[*].holdingsStatements[*].statement",
-        "subfield": "a"
+        "from": "$.holdings[*].temporaryLocationId",
+        "subfield": "c",
+        "translation": {
+          "function": "set_holdings_temporary_location"
+        }
       },
       {
         "indicator": "1",
@@ -96,17 +80,21 @@
         "translation": {
           "function": "set_value",
           "parameters": {
-            "value": "0"
+            "value": " "
           }
         }
       }
     ]
   },
   {
-    "id": "holdings.holdingsstatements.note",
+    "id": "holdings.holdingsstatements.statement",
     "field": "866",
-    "description": "Holdings statement - note",
+    "description": "Holdings statement",
     "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatements[*].statement",
+        "subfield": "a"
+      },
       {
         "from": "$.holdings[*].holdingsStatements[*].note",
         "subfield": "z"
@@ -141,31 +129,6 @@
         "subfield": "a"
       },
       {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "0"
-          }
-        }
-      }
-    ]
-  },
-  {
-    "id": "holdings.holdingsstatementsforsupplements.note",
-    "field": "867",
-    "description": "Holdings statement for supplements - note",
-    "dataSources": [
-      {
         "from": "$.holdings[*].holdingsStatementsForSupplements[*].note",
         "subfield": "z"
       },
@@ -198,31 +161,6 @@
         "from": "$.holdings[*].holdingsStatementsForIndexes[*].statement",
         "subfield": "a"
       },
-      {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "0"
-          }
-        }
-      }
-    ]
-  },
-  {
-    "id": "holdings.holdingsstatementsforindexes.note",
-    "field": "868",
-    "description": "Holdings statement for indexes - note",
-    "dataSources": [
       {
         "from": "$.holdings[*].holdingsStatementsForIndexes[*].note",
         "subfield": "z"
