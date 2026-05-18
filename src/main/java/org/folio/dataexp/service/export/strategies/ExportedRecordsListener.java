@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
@@ -34,8 +35,12 @@ public class ExportedRecordsListener {
     var exported = exportedCount.incrementAndGet();
     if (exported % progressExportedUpdateStep == 0) {
       var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-      var progress = jobExecutionEntity.getJobExecution().getProgress();
+      var jobExecution = jobExecutionEntity.getJobExecution();
+      var progress = jobExecution.getProgress();
+
       progress.setExported(exported);
+      jobExecution.setLastUpdatedDate(new Date());
+
       jobExecutionEntityRepository.save(jobExecutionEntity);
     }
   }
