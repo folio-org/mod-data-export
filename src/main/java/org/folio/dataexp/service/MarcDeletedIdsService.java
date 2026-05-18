@@ -3,6 +3,7 @@ package org.folio.dataexp.service;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.folio.dataexp.util.Constants.BATCH_SIZE;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 import static org.folio.dataexp.util.Constants.DELETED_MARC_IDS_FILE_NAME;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
@@ -83,15 +84,23 @@ public class MarcDeletedIdsService {
           new FolioExecutionContextSetter(
               prepareContextForTenant(
                   centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        payload =
-            new MarcRecordIdentifiersPayload()
-                .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED);
-        log.info("before nonDeletedSharedIds");
-        var nonDeletedSharedIds =
-            sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
-        log.info("After nonDeletedSharedIds: {}", nonDeletedSharedIds.size());
-        marcIds.removeIf(nonDeletedSharedIds::contains);
-        log.info("Deleted MARC IDs after removing non-deleted shared IDs: {}", marcIds.size());
+        int offset = 0;
+        int numRecords;
+        do {
+          payload =
+              new MarcRecordIdentifiersPayload()
+                  .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED)
+                  .withLimit(BATCH_SIZE)
+                  .withOffset(offset);
+          log.info("before nonDeletedSharedIds, offset: {}", offset);
+          var nonDeletedSharedIds =
+              sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+          numRecords = nonDeletedSharedIds.size();
+          log.info("After nonDeletedSharedIds: {}", nonDeletedSharedIds.size());
+          marcIds.removeIf(nonDeletedSharedIds::contains);
+          log.info("Deleted MARC IDs after removing non-deleted shared IDs: {}", marcIds.size());
+          offset += BATCH_SIZE;
+        } while (numRecords == BATCH_SIZE);
       }
     }
 
