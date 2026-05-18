@@ -86,9 +86,12 @@ public class MarcDeletedIdsService {
         payload =
             new MarcRecordIdentifiersPayload()
                 .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED);
+        log.info("before nonDeletedSharedIds");
         var nonDeletedSharedIds =
             sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+        log.info("After nonDeletedSharedIds: {}", nonDeletedSharedIds.size());
         marcIds.removeIf(nonDeletedSharedIds::contains);
+        log.info("Deleted MARC IDs after removing non-deleted shared IDs: {}", marcIds.size());
       }
     }
 
