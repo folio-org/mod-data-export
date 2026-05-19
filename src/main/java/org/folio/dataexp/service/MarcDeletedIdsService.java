@@ -83,10 +83,10 @@ public class MarcDeletedIdsService {
           new FolioExecutionContextSetter(
               prepareContextForTenant(
                   centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        log.info("before getMarcRecordsByExternalIds");
+        log.info("Initial marcIds size: {}", marcIds.size());
         var marcRecordsInCentralTenant =
               sourceStorageClient.getMarcRecordsByExternalIds(marcIds);
-        log.info("after getMarcRecordsByExternalIds: {}",
+        log.info("Total records found in central tenant: {}",
             marcRecordsInCentralTenant.getTotalRecords());
         marcRecordsInCentralTenant.getSourceRecords().forEach(rec -> {
           if (rec.getParsedRecord().getContent().getLeader().charAt(5) != 'd') {
@@ -95,7 +95,7 @@ public class MarcDeletedIdsService {
                 rec.getExternalIdsHolder().getInstanceId());
           }
         });
-        log.info("Deleted MARC IDs after removing non-deleted shared IDs: {}", marcIds.size());
+        log.info("Final marcIds size: {}", marcIds.size());
       }
     }
 
