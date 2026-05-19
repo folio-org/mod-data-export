@@ -3,7 +3,6 @@ package org.folio.dataexp.client;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.List;
-
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
 import org.folio.dataexp.domain.dto.MarcRecordsIdentifiersResponse;
 import org.folio.dataexp.domain.dto.MarcRecordsResponse;
@@ -26,6 +25,12 @@ public interface SourceStorageClient {
   MarcRecordsIdentifiersResponse getMarcRecordsIdentifiers(
       @RequestBody MarcRecordIdentifiersPayload marcRecordIdentifiersPayload);
 
+  /**
+   * Retrieves MARC records by external IDs.
+   *
+   * @param externalIds the list of external IDs for which to retrieve MARC records
+   * @return the response containing MARC records
+   */
   @PostExchange(value = "/source-records?idType=INSTANCE",
       accept = APPLICATION_JSON_VALUE)
   MarcRecordsResponse getMarcRecordsByExternalIds(

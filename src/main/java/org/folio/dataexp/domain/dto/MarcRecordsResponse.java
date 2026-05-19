@@ -1,10 +1,13 @@
 package org.folio.dataexp.domain.dto;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 import lombok.Data;
 
+/**
+ * To hold response from source storage when retrieving MARC
+ * records by external IDs.
+ */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MarcRecordsResponse {
