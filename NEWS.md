@@ -1,3 +1,9 @@
+## 19/05/2026 v5.4.3 Released
+
+This release contains fix for the updated date once progress is updated
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.4.2...v5.4.3)
+
 ## 05/12/2026 v5.4.2 Released
 ### Bugs
 [MDEXP-921](https://folio-org.atlassian.net/browse/MDEXP-921) “Failed“ column is empty when export using Default linked data export job profile completes with errors or fails with not found records
