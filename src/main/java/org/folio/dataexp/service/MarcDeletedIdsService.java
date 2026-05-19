@@ -3,7 +3,6 @@ package org.folio.dataexp.service;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.folio.dataexp.util.Constants.BATCH_SIZE;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 import static org.folio.dataexp.util.Constants.DELETED_MARC_IDS_FILE_NAME;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
@@ -84,23 +83,19 @@ public class MarcDeletedIdsService {
           new FolioExecutionContextSetter(
               prepareContextForTenant(
                   centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        int offset = 0;
-        int numRecords;
-        do {
-          payload =
-              new MarcRecordIdentifiersPayload()
-                  .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED)
-                  .withLimit(BATCH_SIZE)
-                  .withOffset(offset);
-          log.info("before nonDeletedSharedIds, offset: {}", offset);
-          var nonDeletedSharedIds =
-              sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
-          numRecords = nonDeletedSharedIds.size();
-          log.info("After nonDeletedSharedIds: {}", nonDeletedSharedIds.size());
-          marcIds.removeIf(nonDeletedSharedIds::contains);
-          log.info("Deleted MARC IDs after removing non-deleted shared IDs: {}", marcIds.size());
-          offset += BATCH_SIZE;
-        } while (numRecords == BATCH_SIZE);
+        log.info("before getMarcRecordsByExternalIds");
+        var marcRecordsInCentralTenant =
+              sourceStorageClient.getMarcRecordsByExternalIds(marcIds);
+        log.info("after getMarcRecordsByExternalIds: {}",
+            marcRecordsInCentralTenant.getTotalRecords());
+        marcRecordsInCentralTenant.getSourceRecords().forEach(rec -> {
+          if (rec.getParsedRecord().getContent().getLeader().charAt(5) != 'd') {
+            marcIds.remove(rec.getExternalIdsHolder().getInstanceId());
+            log.info("Removed non-deleted shared MARC ID: {}",
+                rec.getExternalIdsHolder().getInstanceId());
+          }
+        });
+        log.info("Deleted MARC IDs after removing non-deleted shared IDs: {}", marcIds.size());
       }
     }
 
