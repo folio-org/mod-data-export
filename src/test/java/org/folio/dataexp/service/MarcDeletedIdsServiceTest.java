@@ -20,14 +20,14 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.SourceStorageClient;
-import org.folio.dataexp.domain.dto.ExternalIdsHolder;
+import org.folio.dataexp.domain.dto.srsresponse.ExternalIdsHolder;
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.domain.dto.MarcContent;
+import org.folio.dataexp.domain.dto.srsresponse.Content;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
-import org.folio.dataexp.domain.dto.MarcRecordResponse;
+import org.folio.dataexp.domain.dto.srsresponse.MarcRecordResponse;
 import org.folio.dataexp.domain.dto.MarcRecordsIdentifiersResponse;
-import org.folio.dataexp.domain.dto.MarcRecordsResponse;
-import org.folio.dataexp.domain.dto.ParsedRecord;
+import org.folio.dataexp.domain.dto.srsresponse.MarcRecordsResponse;
+import org.folio.dataexp.domain.dto.srsresponse.ParsedRecord;
 import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -289,8 +289,7 @@ class MarcDeletedIdsServiceTest {
 
     verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
     var resultContent = resourceArgumentCaptor.getValue().getContentAsString(UTF_8);
-    assertThat(resultContent).contains(deletedId);
-    assertThat(resultContent).doesNotContain(nonDeletedId);
+    assertThat(resultContent).contains(deletedId).doesNotContain(nonDeletedId);
   }
 
   /**
@@ -331,8 +330,7 @@ class MarcDeletedIdsServiceTest {
 
     verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
     var resultContent = resourceArgumentCaptor.getValue().getContentAsString(UTF_8);
-    assertThat(resultContent).contains(id1);
-    assertThat(resultContent).contains(id2);
+    assertThat(resultContent).contains(id1).contains(id2);
   }
 
   /** When the central tenant returns an empty list, all local deleted IDs are preserved. */
@@ -367,21 +365,20 @@ class MarcDeletedIdsServiceTest {
 
     verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
     var resultContent = resourceArgumentCaptor.getValue().getContentAsString(UTF_8);
-    assertThat(resultContent).contains(id1);
-    assertThat(resultContent).contains(id2);
+    assertThat(resultContent).contains(id1).contains(id2);
   }
 
   // Helper to build a MarcRecordResponse with given instanceId and MARC leader string
   private MarcRecordResponse buildMarcRecord(String instanceId, String leader) {
-    var marcContent = new MarcContent();
+    var marcContent = new Content();
     marcContent.setLeader(leader);
     var parsedRecord = new ParsedRecord();
     parsedRecord.setContent(marcContent);
     var externalIdsHolder = new ExternalIdsHolder();
     externalIdsHolder.setInstanceId(instanceId);
-    var record = new MarcRecordResponse();
-    record.setParsedRecord(parsedRecord);
-    record.setExternalIdsHolder(externalIdsHolder);
-    return record;
+    var marcRecordResponse = new MarcRecordResponse();
+    marcRecordResponse.setParsedRecord(parsedRecord);
+    marcRecordResponse.setExternalIdsHolder(externalIdsHolder);
+    return marcRecordResponse;
   }
 }

@@ -1,4 +1,4 @@
-package org.folio.dataexp.domain.dto;
+package org.folio.dataexp.domain.dto.srsresponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

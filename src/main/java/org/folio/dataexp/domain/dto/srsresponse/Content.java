@@ -1,4 +1,4 @@
-package org.folio.dataexp.domain.dto;
+package org.folio.dataexp.domain.dto.srsresponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MarcContent {
+public class Content {
 
   private String leader;
 }
