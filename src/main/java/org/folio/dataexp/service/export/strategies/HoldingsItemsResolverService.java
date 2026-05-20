@@ -120,7 +120,7 @@ public class HoldingsItemsResolverService {
     removeNotAffiliatedTenants(consortiaHoldingsIdsPerTenant, instanceId, jobExecutionId);
     removeNotPermittedTenants(consortiaHoldingsIdsPerTenant, instanceId, jobExecutionId);
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
-      log.info("entry: {}", entry);
+      log.debug("entry: {}", entry);
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
       var holdingsEntities =
