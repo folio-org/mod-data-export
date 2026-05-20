@@ -4,18 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
+import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import org.folio.dataexp.domain.dto.JobExecutionProgress;
-import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 
 class JobExecutionEntityTest {
 
@@ -118,33 +117,37 @@ class JobExecutionEntityTest {
     }
   }
 
-    @Test
-  @TestMate(name = "TestMate-f98234b1c2d3e4f5a6b7c8d9e0f1a2b3")
+  @Test
+  @TestMate(name = "TestMate-a3e2ca6ca1e9d288b1b82c5ff0e5bc9a")
   void fromJobExecutionShouldMapAllFieldsWhenFullyPopulated() {
-    // TestMate-a3e2ca6ca1e9d288b1b82c5ff0e5bc9a
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobProfileId = UUID.fromString("00000000-0000-0000-0000-000000000002");
     var userId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    
+
     var startedTimestamp = 1704103200000L; // 2024-01-01T10:00:00Z
     var completedTimestamp = 1704106800000L; // 2024-01-01T11:00:00Z
     var currentTimestamp = 1704110400000L; // 2024-01-01T12:00:00Z
-    var jobExecution = new JobExecution()
-        .id(jobExecutionId)
-        .hrId(1001)
-        .status(JobExecution.StatusEnum.COMPLETED)
-        .jobProfileId(jobProfileId)
-        .jobProfileName("Test Profile")
-        .progress(new JobExecutionProgress().total(50).exported(45).failed(5))
-        .runBy(new JobExecutionRunBy().userId(userId.toString()).firstName("John").lastName("Doe"))
-        .startedDate(new Date(startedTimestamp))
-        .completedDate(new Date(completedTimestamp));
-    try (MockedConstruction<Date> mockedDate = mockConstruction(Date.class, (mock, context) -> {
-      if (context.arguments().isEmpty()) {
-        when(mock.getTime()).thenReturn(currentTimestamp);
-      }
-    })) {
+    var jobExecution =
+        new JobExecution()
+            .id(jobExecutionId)
+            .hrId(1001)
+            .status(JobExecution.StatusEnum.COMPLETED)
+            .jobProfileId(jobProfileId)
+            .jobProfileName("Test Profile")
+            .progress(new JobExecutionProgress().total(50).exported(45).failed(5))
+            .runBy(
+                new JobExecutionRunBy().userId(userId.toString()).firstName("John").lastName("Doe"))
+            .startedDate(new Date(startedTimestamp))
+            .completedDate(new Date(completedTimestamp));
+    try (MockedConstruction<Date> mockedDate =
+        mockConstruction(
+            Date.class,
+            (mock, context) -> {
+              if (context.arguments().isEmpty()) {
+                when(mock.getTime()).thenReturn(currentTimestamp);
+              }
+            })) {
       // When
       var actualEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       // Then
@@ -162,24 +165,27 @@ class JobExecutionEntityTest {
       assertThat(actualEntity.getRunByLastName()).isEqualTo("Doe");
       assertThat(actualEntity.getStartedDate()).isEqualTo(LocalDateTime.of(2024, 1, 1, 10, 0, 0));
       assertThat(actualEntity.getCompletedDate()).isEqualTo(LocalDateTime.of(2024, 1, 1, 11, 0, 0));
-      
+
       assertThat(jobExecution.getLastUpdatedDate().getTime()).isEqualTo(currentTimestamp);
     }
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-fdab45d20dedc42cc7e5d752be97110a")
   void fromJobExecutionShouldPreserveExistingId() {
-    // TestMate-fdab45d20dedc42cc7e5d752be97110a
     // Given
     var existingId = UUID.fromString("00000000-0000-0000-0000-00000000000A");
     var expectedTimestamp = 1705314600000L;
     var jobExecution = new JobExecution().id(existingId);
     try (MockedStatic<UUID> mockedUuid = Mockito.mockStatic(UUID.class);
-        MockedConstruction<Date> mockedDate = mockConstruction(Date.class, (mock, context) -> {
-          if (context.arguments().isEmpty()) {
-            when(mock.getTime()).thenReturn(expectedTimestamp);
-          }
-        })) {
+        MockedConstruction<Date> mockedDate =
+            mockConstruction(
+                Date.class,
+                (mock, context) -> {
+                  if (context.arguments().isEmpty()) {
+                    when(mock.getTime()).thenReturn(expectedTimestamp);
+                  }
+                })) {
       // When
       var actualEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       // Then
