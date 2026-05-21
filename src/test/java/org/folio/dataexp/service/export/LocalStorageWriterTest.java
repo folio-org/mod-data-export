@@ -25,6 +25,8 @@ import org.folio.dataexp.util.S3FilePathUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.util.ReflectionTestUtils;
+import java.io.BufferedReader;
+import java.util.Optional;
 
 class LocalStorageWriterTest {
 
@@ -204,6 +206,68 @@ class LocalStorageWriterTest {
     } finally {
       // Cleanup
       tempDirFile.setWritable(true);
+    }
+  }
+
+    @Test
+  @SneakyThrows
+  void getReaderShouldReturnBufferedReaderWhenFileExists(@TempDir Path tempDir) {
+    // TestMate-c585caca90171156d3978648043d35d7
+    // Given
+    String fileName = "test-reader.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    String sampleData = "sample marc data";
+    var localStorageWriter = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    localStorageWriter.write(sampleData);
+    localStorageWriter.close();
+    // When
+    Optional<BufferedReader> readerOptional = localStorageWriter.getReader();
+    // Then
+    assertTrue(readerOptional.isPresent());
+    try (BufferedReader reader = readerOptional.get()) {
+      String actualContent = reader.readLine();
+      assertEquals(sampleData, actualContent);
+    }
+  }
+
+    @Test
+  @SneakyThrows
+  void getReaderShouldReturnEmptyOptionalWhenFileIsMissing(@TempDir Path tempDir) {
+    // TestMate-696df2b74b62444495b47727c85d5e18
+    // Given
+    String fileName = "missing-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    var localStorageWriter = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    Files.delete(filePath);
+    // When
+    Optional<BufferedReader> readerOptional = localStorageWriter.getReader();
+    // Then
+    assertTrue(readerOptional.isEmpty());
+  }
+
+    @Test
+  @TestMate(name = "TestMate-7c5e2a1b4d3f6e8a9c0b1d2e3f4a5b6c")
+  @SneakyThrows
+  void getReaderShouldReturnEmptyOptionalWhenAccessIsDenied(@TempDir Path tempDir) {
+    // TestMate-85c18e3ebdd59899df406e07e828a1af
+    // Given
+    String fileName = "restricted-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    var localStorageWriter = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    localStorageWriter.write("restricted data");
+    localStorageWriter.close();
+    File file = filePath.toFile();
+    file.setReadable(false);
+    try {
+      // When
+      Optional<BufferedReader> readerOptional = localStorageWriter.getReader();
+      // Then
+      assertTrue(readerOptional.isEmpty());
+    } finally {
+      file.setReadable(true);
     }
   }
 }
