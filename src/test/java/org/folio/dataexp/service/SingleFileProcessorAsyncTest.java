@@ -254,7 +254,7 @@ class SingleFileProcessorAsyncTest {
       assertThat(listener).isNotNull();
       var actualStep = (int) ReflectionTestUtils.getField(listener, "progressExportedUpdateStep");
       assertThat(actualStep).isEqualTo(expectedStep);
-      verify(exportExecutor).export(eq(exportEntity), eq(exportRequest), eq(commonExportStatistic));
+      verify(exportExecutor).export(exportEntity, exportRequest, commonExportStatistic);
     }
   }
 }
