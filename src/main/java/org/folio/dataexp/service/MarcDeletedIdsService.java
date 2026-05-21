@@ -5,6 +5,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 import static org.folio.dataexp.util.Constants.DELETED_MARC_IDS_FILE_NAME;
+import static org.folio.dataexp.util.Constants.LEADER_STATUS_DELETED;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
 import java.time.LocalDateTime;
@@ -83,12 +84,18 @@ public class MarcDeletedIdsService {
           new FolioExecutionContextSetter(
               prepareContextForTenant(
                   centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        payload =
-            new MarcRecordIdentifiersPayload()
-                .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED);
-        var nonDeletedSharedIds =
-            sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
-        marcIds.removeIf(nonDeletedSharedIds::contains);
+        var marcRecordsInCentralTenant =
+              sourceStorageClient.getMarcRecordsByExternalIds(marcIds);
+        log.info("Number of them (deleted MARC IDs) found in central tenant: {}",
+            marcRecordsInCentralTenant.getTotalRecords());
+        marcRecordsInCentralTenant.getSourceRecords().forEach(rec -> {
+          if (rec.getParsedRecord().getContent().getLeader().charAt(5) != LEADER_STATUS_DELETED) {
+            marcIds.remove(rec.getExternalIdsHolder().getInstanceId());
+            log.debug("Removed non-deleted shared MARC ID: {}",
+                rec.getExternalIdsHolder().getInstanceId());
+          }
+        });
+        log.info("Final deleted MARC IDs size: {}", marcIds.size());
       }
     }
 

@@ -20,11 +20,17 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.SourceStorageClient;
+import org.folio.dataexp.domain.dto.srsresponse.ExternalIdsHolder;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.folio.dataexp.domain.dto.srsresponse.Content;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
+import org.folio.dataexp.domain.dto.srsresponse.MarcRecordResponse;
 import org.folio.dataexp.domain.dto.MarcRecordsIdentifiersResponse;
+import org.folio.dataexp.domain.dto.srsresponse.MarcRecordsResponse;
+import org.folio.dataexp.domain.dto.srsresponse.ParsedRecord;
 import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,6 +54,7 @@ class MarcDeletedIdsServiceTest {
   @Captor private ArgumentCaptor<MarcRecordIdentifiersPayload> payloadArgumentCaptor;
   @Mock private FolioExecutionContext folioExecutionContext;
   @Mock private ConsortiaService consortiaService;
+  @Mock private FolioModuleMetadata folioModuleMetadata;
   @InjectMocks private MarcDeletedIdsService marcDeletedIdsService;
   @Captor private ArgumentCaptor<ByteArrayResource> resourceArgumentCaptor;
 
@@ -195,15 +202,22 @@ class MarcDeletedIdsServiceTest {
     var id2 = UUID.randomUUID().toString();
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
         .thenReturn(
-            new MarcRecordsIdentifiersResponse().withRecords(List.of(id1, id2)).withTotalCount(2))
-        .thenReturn(
-            new MarcRecordsIdentifiersResponse().withRecords(List.of(id2)).withTotalCount(1));
+            new MarcRecordsIdentifiersResponse().withRecords(List.of(id1, id2)).withTotalCount(2));
+    // id2 exists in central tenant and is NOT deleted (leader[5] != 'd') -> should be removed
+    var nonDeletedRec = buildMarcRecord(id2, "00000nam a2200000 i 4500");
+    var centralResponse = new MarcRecordsResponse();
+    centralResponse.setSourceRecords(List.of(nonDeletedRec));
+    centralResponse.setTotalRecords(1);
+    when(sourceStorageClient.getMarcRecordsByExternalIds(isA(List.class)))
+        .thenReturn(centralResponse);
     when(consortiaService.isCurrentTenantCentralTenant("member")).thenReturn(false);
     when(consortiaService.getCentralTenantId("member")).thenReturn("central");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     var fileDefinition = new FileDefinition().id(UUID.randomUUID());
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
+        .thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
 
     marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
@@ -232,5 +246,139 @@ class MarcDeletedIdsServiceTest {
     verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
     assertThat(resourceArgumentCaptor.getValue().getContentAsString(UTF_8))
         .isEqualTo(String.join(System.lineSeparator(), List.of(id1, id2)));
+  }
+
+  // ---- tests for lines 86-98 (getMarcRecordsByExternalIds filtering) ----
+
+  /**
+   * When the central tenant returns a record whose leader position 5 is NOT 'd' (not deleted), that
+   * ID must be removed from the final list.
+   */
+  @Test
+  @SneakyThrows
+  void shouldRemoveNonDeletedSharedIdFromCentralTenant() {
+    var deletedId = UUID.randomUUID().toString();
+    var nonDeletedId = UUID.randomUUID().toString();
+
+    when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse()
+                .withRecords(List.of(deletedId, nonDeletedId))
+                .withTotalCount(2));
+
+    // Central tenant returns one record where leader[5] == 'n' (not deleted)
+    var nonDeletedRecord = buildMarcRecord(nonDeletedId, "00000nam a2200000 i 4500");
+    var centralResponse = new MarcRecordsResponse();
+    centralResponse.setSourceRecords(List.of(nonDeletedRecord));
+    centralResponse.setTotalRecords(1);
+
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+    when(consortiaService.isCurrentTenantCentralTenant("member")).thenReturn(false);
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(sourceStorageClient.getMarcRecordsByExternalIds(isA(List.class)))
+        .thenReturn(centralResponse);
+
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
+        .thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
+        .thenReturn(fileDefinition);
+
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
+
+    verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
+    var resultContent = resourceArgumentCaptor.getValue().getContentAsString(UTF_8);
+    assertThat(resultContent).contains(deletedId).doesNotContain(nonDeletedId);
+  }
+
+  /**
+   * When the central tenant returns a record whose leader position 5 IS 'd' (deleted), that ID must
+   * be kept in the final list.
+   */
+  @Test
+  @SneakyThrows
+  void shouldKeepAllIdsWhenAllCentralTenantRecordsAreDeleted() {
+    var id1 = UUID.randomUUID().toString();
+    var id2 = UUID.randomUUID().toString();
+
+    when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse().withRecords(List.of(id1, id2)).withTotalCount(2));
+
+    // Both records found in central tenant have leader[5] == 'd' (deleted)
+    var rec1 = buildMarcRecord(id1, "00000dam a2200000 i 4500");
+    var rec2 = buildMarcRecord(id2, "00000dam a2200000 i 4500");
+    var centralResponse = new MarcRecordsResponse();
+    centralResponse.setSourceRecords(List.of(rec1, rec2));
+    centralResponse.setTotalRecords(2);
+
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+    when(consortiaService.isCurrentTenantCentralTenant("member")).thenReturn(false);
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(sourceStorageClient.getMarcRecordsByExternalIds(isA(List.class)))
+        .thenReturn(centralResponse);
+
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
+        .thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
+        .thenReturn(fileDefinition);
+
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
+
+    verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
+    var resultContent = resourceArgumentCaptor.getValue().getContentAsString(UTF_8);
+    assertThat(resultContent).contains(id1).contains(id2);
+  }
+
+  /** When the central tenant returns an empty list, all local deleted IDs are preserved. */
+  @Test
+  @SneakyThrows
+  void shouldKeepAllIdsWhenCentralTenantReturnsEmptyList() {
+    var id1 = UUID.randomUUID().toString();
+    var id2 = UUID.randomUUID().toString();
+
+    when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse().withRecords(List.of(id1, id2)).withTotalCount(2));
+
+    var centralResponse = new MarcRecordsResponse();
+    centralResponse.setSourceRecords(List.of());
+    centralResponse.setTotalRecords(0);
+
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+    when(consortiaService.isCurrentTenantCentralTenant("member")).thenReturn(false);
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(sourceStorageClient.getMarcRecordsByExternalIds(isA(List.class)))
+        .thenReturn(centralResponse);
+
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
+        .thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
+        .thenReturn(fileDefinition);
+
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
+
+    verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
+    var resultContent = resourceArgumentCaptor.getValue().getContentAsString(UTF_8);
+    assertThat(resultContent).contains(id1).contains(id2);
+  }
+
+  // Helper to build a MarcRecordResponse with given instanceId and MARC leader string
+  private MarcRecordResponse buildMarcRecord(String instanceId, String leader) {
+    var marcContent = new Content();
+    marcContent.setLeader(leader);
+    var parsedRecord = new ParsedRecord();
+    parsedRecord.setContent(marcContent);
+    var externalIdsHolder = new ExternalIdsHolder();
+    externalIdsHolder.setInstanceId(instanceId);
+    var marcRecordResponse = new MarcRecordResponse();
+    marcRecordResponse.setParsedRecord(parsedRecord);
+    marcRecordResponse.setExternalIdsHolder(externalIdsHolder);
+    return marcRecordResponse;
   }
 }

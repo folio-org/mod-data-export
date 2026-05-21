@@ -99,7 +99,7 @@ class RuleFactoryTest {
   @TestMate(name = "TestMate-8731170170f755ee33961c2944bda653")
   void createDefaultByTransformations_shouldUseSpecificBuilder_whenFieldIdMatchesKey()
       throws TransformationRuleException {
-    //
+
     // Given
     var transformationFieldId = "instance.electronic.access.uri";
     var transformationPath = "$.source.uri";
@@ -142,7 +142,7 @@ class RuleFactoryTest {
   @TestMate(name = "TestMate-4959e1b60d69a04af56ac35d2a056652")
   void createDefaultByTransformations_shouldFallbackToDefaultBuilder_whenNoSpecificKeyMatches()
       throws TransformationRuleException {
-    //
+
     // Given
     var fieldId = "instance.title";
     Transformations transformations = new Transformations();
