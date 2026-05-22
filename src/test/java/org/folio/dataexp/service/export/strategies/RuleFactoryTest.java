@@ -26,6 +26,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.verify;
+import java.util.Collections;
+import java.util.Set;
+import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryTest {
@@ -391,5 +398,131 @@ class RuleFactoryTest {
         .hasSize(1)
         .containsExactly(instanceDefaultRule)
         .doesNotContain(holdingsDefaultRule);
+  }
+
+    @Test
+  void createShouldAppendHoldingsDefaultRulesWhenRequested() throws TransformationRuleException {
+    // TestMate-2dc55c8cc79b1f8dfcde3801e9b672a5
+    // Given
+    var initialRule = new Rule();
+    initialRule.setId("instance.hrid");
+    var initialRules = new ArrayList<>(List.of(initialRule));
+    var defaultHoldingsRule = new Rule();
+    defaultHoldingsRule.setId("holdings.default");
+    var defaultHoldingsRules = List.of(defaultHoldingsRule);
+    var ruleFactoryLocal = new RuleFactory(new ArrayList<>(), defaultHoldingsRules);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString("c0a80101-0000-0000-0000-000000000001"));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
+    mappingProfile.setTransformations(new ArrayList<>());
+    // When
+    var actualRules = ruleFactoryLocal.create(mappingProfile, initialRules, true);
+    // Then
+    assertThat(actualRules)
+        .isSameAs(initialRules)
+        .hasSize(2)
+        .containsExactly(initialRule, defaultHoldingsRule);
+  }
+
+    @Test
+  void createShouldGenerateRulesFromTransformations() throws TransformationRuleException {
+    // TestMate-b230324ed45cb21c127310ac69ed7026
+    // Given
+    var customProfileId = UUID.fromString("d0a80101-0000-0000-0000-000000000001");
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(customProfileId);
+    var transformation = new Transformations();
+    transformation.setFieldId("instance.title");
+    var transformations = List.of(transformation);
+    mappingProfile.setTransformations(transformations);
+    mappingProfile.setRecordTypes(Collections.emptyList());
+    var initialDefaultRules = new ArrayList<Rule>();
+    var expectedRule = new Rule();
+    expectedRule.setId("transformed.rule");
+    var expectedRulesSet = Set.of(expectedRule);
+    var spyRuleFactory = spy(ruleFactory);
+    doReturn(expectedRulesSet).when(spyRuleFactory).createByTransformations(transformations, initialDefaultRules);
+    // When
+    var actualRules = spyRuleFactory.create(mappingProfile, initialDefaultRules, false);
+    // Then
+    assertThat(actualRules)
+        .hasSize(1)
+        .containsExactly(expectedRule);
+    verify(spyRuleFactory).createByTransformations(transformations, initialDefaultRules);
+  }
+
+    @Test
+  void createShouldAppendDefaultInstanceRulesForDefaultProfile() throws TransformationRuleException {
+    // TestMate-56278d4dda4f2cbc4d2effc83b633b69
+    // Given
+    var baselineRule = new Rule();
+    baselineRule.setId("baseline.rule");
+    var defaultRulesFromConfigFile = List.of(baselineRule);
+    var ruleFactoryLocal = new RuleFactory(defaultRulesFromConfigFile, new ArrayList<>());
+    var spyRuleFactory = spy(ruleFactoryLocal);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var transformations = List.of(new Transformations());
+    mappingProfile.setTransformations(transformations);
+    var customRule = new Rule();
+    customRule.setId("custom.rule");
+    var customRulesSet = Set.of(customRule);
+    // Fix: Use eq() matcher for the first argument because anyList() is used for the second argument
+    doReturn(customRulesSet)
+        .when(spyRuleFactory)
+        .createByTransformations(eq(transformations), anyList());
+    // When
+    var actualRules = spyRuleFactory.create(mappingProfile, new ArrayList<>(), false);
+    // Then
+    assertThat(actualRules).hasSize(2).containsExactly(customRule, baselineRule);
+    verify(spyRuleFactory).createByTransformations(eq(transformations), anyList());
+  }
+
+    @Test
+  void createShouldNotAppendHoldingsRulesWhenRequestedButTypeNotHoldings() throws TransformationRuleException {
+    // TestMate-4f84bc23a2303857eb884a745670ae71
+    // Given
+    var initialRule = new Rule();
+    initialRule.setId("instance.hrid");
+    var initialRules = new ArrayList<>(List.of(initialRule));
+    var defaultHoldingsRule = new Rule();
+    defaultHoldingsRule.setId("holdings.default");
+    var defaultHoldingsRules = List.of(defaultHoldingsRule);
+    var ruleFactoryLocal = new RuleFactory(new ArrayList<>(), defaultHoldingsRules);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString("d0a80101-0000-0000-0000-000000000001"));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    mappingProfile.setTransformations(null);
+    // When
+    var actualRules = ruleFactoryLocal.create(mappingProfile, initialRules, true);
+    // Then
+    assertThat(actualRules)
+        .isSameAs(initialRules)
+        .hasSize(1)
+        .containsExactly(initialRule)
+        .doesNotContain(defaultHoldingsRule);
+  }
+
+    @Test
+  void createShouldPropagateTransformationRuleExceptionFromCreateByTransformations() throws TransformationRuleException {
+    // TestMate-25f02f01c02973ad5f8aa00674140688
+    // Given
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString("c0a80101-0000-0000-0000-000000000001"));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    var transformations = List.of(new Transformations());
+    mappingProfile.setTransformations(transformations);
+    var defaultRules = new ArrayList<Rule>();
+    var exceptionMessage = "Transformation failed";
+    var spyRuleFactory = spy(ruleFactory);
+    doThrow(new TransformationRuleException(exceptionMessage))
+        .when(spyRuleFactory)
+        .createByTransformations(anyList(), anyList());
+    // When
+    var exception = assertThrows(TransformationRuleException.class, () ->
+        spyRuleFactory.create(mappingProfile, defaultRules, false));
+    // Then
+    assertThat(exception.getMessage()).isEqualTo(exceptionMessage);
+    verify(spyRuleFactory).createByTransformations(transformations, defaultRules);
   }
 }
