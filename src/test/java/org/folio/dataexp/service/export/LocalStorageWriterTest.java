@@ -73,8 +73,9 @@ class LocalStorageWriterTest {
     var localStorageWriter = spy(createWriter(fileName));
     localStorageWriter.write("test data");
     var bufferedWriterSpy =
-        spy((BufferedWriter) Objects.requireNonNull(
-          ReflectionTestUtils.getField(localStorageWriter, "writer")));
+        spy(
+            (BufferedWriter)
+                Objects.requireNonNull(ReflectionTestUtils.getField(localStorageWriter, "writer")));
     ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterSpy);
     var filePath = resolveFile(fileName);
 
