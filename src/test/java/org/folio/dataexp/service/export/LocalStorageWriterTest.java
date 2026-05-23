@@ -21,6 +21,8 @@ import org.folio.dataexp.exception.export.LocalStorageWriterException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.Mockito.mockStatic;
+import org.mockito.MockedStatic;
 
 class LocalStorageWriterTest {
 
@@ -255,6 +257,40 @@ class LocalStorageWriterTest {
 
       // Then
       assertThat(readerOptional).isEmpty();
+    }
+  }
+
+    @Test
+  void testWriteWhenDataIsEmptyShouldDeleteFile() {
+    // TestMate-c9086cf582de14691d6564478833cb6f
+    // Given
+    var fileName = "empty_data.mrc";
+    var writer = createWriter(fileName);
+    var filePath = resolveFile(fileName);
+    assertThat(filePath).exists();
+    // When
+    writer.write("");
+    // Then
+    assertThat(filePath).doesNotExist();
+  }
+
+    @Test
+  void testWriteWhenDeletionFailsDuringCleanupShouldThrowLocalStorageWriterException() {
+    // TestMate-61d3cbd29c6e50d165d9ddf71bb82c45
+    // Given
+    var fileName = "cleanup_failure.mrc";
+    var writer = createWriter(fileName);
+    var filePath = writer.getPath();
+    var errorMessage = "Access denied";
+    try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
+      mockedFiles
+          .when(() -> Files.deleteIfExists(filePath))
+          .thenThrow(new IOException(errorMessage));
+      // When & Then
+      assertThatThrownBy(() -> writer.write((String) null))
+          .isInstanceOf(LocalStorageWriterException.class)
+          .hasMessageStartingWith("Error in deleting file: ")
+          .hasMessageContaining(errorMessage);
     }
   }
 }
