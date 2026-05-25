@@ -67,7 +67,6 @@ public class HoldingsItemsResolverService {
       String instanceHrid,
       MappingProfile mappingProfile,
       UUID jobExecutionId) {
-    log.info("retrieveHoldingsAndItemsByInstanceId");
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return;
     }

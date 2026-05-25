@@ -1,5 +1,11 @@
 ## v5.5.0 Unreleased
 
+## 05/25/2026 v5.4.4 Released
+
+This release contains bug fixes
+
+### Bugs
+[MDEXP-919](https://folio-org.atlassian.net/browse/MDEXP-919) 504 Gateway Timeout error when export deleted marc bib records from Member tenant on ECS Sprint testing environment
 
 ### Bugs
 [MDEXP-921](https://folio-org.atlassian.net/browse/MDEXP-921) “Failed“ column is empty when export using Default linked data export job profile completes with errors or fails with not found records
