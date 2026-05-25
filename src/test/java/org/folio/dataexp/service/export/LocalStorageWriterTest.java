@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 
 class LocalStorageWriterTest {
 
@@ -295,5 +297,25 @@ class LocalStorageWriterTest {
           .hasMessageStartingWith("Error in deleting file: ")
           .hasMessageContaining(errorMessage);
     }
+  }
+
+    @Test
+  @SneakyThrows
+  void testWriteWhenBufferedWriterThrowsIOExceptionShouldDeleteFile() {
+    // TestMate-373236afc30071916753e3f8832407fc
+    // Given
+    var fileName = "io_exception_test.mrc";
+    var localStorageWriter = createWriter(fileName);
+    var filePath = resolveFile(fileName);
+    var bufferedWriterMock = mock(BufferedWriter.class);
+    doThrow(new IOException("Disk full")).when(bufferedWriterMock).append(anyString());
+    ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterMock);
+    assertThat(filePath).exists();
+    // When
+    localStorageWriter.write("valid data");
+    // Then
+    assertThat(filePath).doesNotExist();
+    verify(bufferedWriterMock).append("valid data");
+    verify(bufferedWriterMock).close();
   }
 }
