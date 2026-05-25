@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import org.folio.dataexp.TestMate;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class LocalStorageWriterTest {
@@ -255,6 +257,43 @@ class LocalStorageWriterTest {
 
       // Then
       assertThat(readerOptional).isEmpty();
+    }
+  }
+
+  @Test
+  @TestMate(name = "TestMate-c9086cf582de14691d6564478833cb6f")
+  void testWriteWhenDataIsEmptyShouldDeleteFile() {
+    // Given
+    var fileName = "empty_data.mrc";
+    var writer = createWriter(fileName);
+    var filePath = resolveFile(fileName);
+    assertThat(filePath).exists();
+
+    // When
+    writer.write("");
+
+    // Then
+    assertThat(filePath).doesNotExist();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-61d3cbd29c6e50d165d9ddf71bb82c45")
+  void testWriteWhenDeletionFailsDuringCleanupShouldThrowLocalStorageWriterException() {
+    // Given
+    var fileName = "cleanup_failure.mrc";
+    var writer = createWriter(fileName);
+    var filePath = writer.getPath();
+    var errorMessage = "Access denied";
+    try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
+      mockedFiles
+          .when(() -> Files.deleteIfExists(filePath))
+          .thenThrow(new IOException(errorMessage));
+
+      // When & Then
+      assertThatThrownBy(() -> writer.write((String) null))
+          .isInstanceOf(LocalStorageWriterException.class)
+          .hasMessageStartingWith("Error in deleting file: ")
+          .hasMessageContaining(errorMessage);
     }
   }
 }
