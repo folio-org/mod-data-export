@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +33,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.LinkedHashSet;
 
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryTest {
@@ -508,28 +508,28 @@ class RuleFactoryTest {
     verify(spyRuleFactory).createByTransformations(transformations, defaultRules);
   }
 
-    @Test
-  void createByTransformations_shouldReturnEmptySet_whenInputListIsEmpty() throws TransformationRuleException {
-    // TestMate-c0c9aee72f7250e9050bdf39a2a022c9
+  @Test
+  @TestMate(name = "TestMate-c0c9aee72f7250e9050bdf39a2a022c9")
+  void createByTransformations_shouldReturnEmptySet_whenInputListIsEmpty()
+      throws TransformationRuleException {
     // Given
     List<Transformations> mappingTransformations = Collections.emptyList();
     List<Rule> defaultRules = new ArrayList<>();
+
     // When
-    Set<Rule> actualRules = ruleFactory.createByTransformations(mappingTransformations, defaultRules);
+    Set<Rule> actualRules =
+        ruleFactory.createByTransformations(mappingTransformations, defaultRules);
+
     // Then
-    assertThat(actualRules)
-        .isInstanceOf(LinkedHashSet.class)
-        .isEmpty();
+    assertThat(actualRules).isInstanceOf(LinkedHashSet.class).isEmpty();
   }
 
-    @ParameterizedTest
-  @CsvSource({
-    "INSTANCE, '', true",
-    "HOLDINGS, , false"
-  })
+  @ParameterizedTest
+  @TestMate(name = "TestMate-2a2e801904b3f42c79f79b9e9b05b8c3")
+  @CsvSource({"INSTANCE, '', true", "HOLDINGS, , false"})
   void createByTransformations_shouldHandleBlankTransformationsBasedOnRecordType(
-      RecordTypes recordType, String transformationValue, boolean isRuleReturned) throws TransformationRuleException {
-    // TestMate-2a2e801904b3f42c79f79b9e9b05b8c3
+      RecordTypes recordType, String transformationValue, boolean isRuleReturned)
+      throws TransformationRuleException {
     // Given
     var transformation = createTransformations(true, "test.field", recordType);
     transformation.setPath("$.test.path");
@@ -542,8 +542,11 @@ class RuleFactoryTest {
     doReturn(expectedOptional)
         .when(spyRuleFactory)
         .createDefaultByTransformations(eq(transformation), anyList());
+
     // When
-    Set<Rule> actualRules = spyRuleFactory.createByTransformations(mappingTransformations, defaultRules);
+    Set<Rule> actualRules =
+        spyRuleFactory.createByTransformations(mappingTransformations, defaultRules);
+
     // Then
     verify(spyRuleFactory).createDefaultByTransformations(transformation, defaultRules);
     assertThat(actualRules).isInstanceOf(LinkedHashSet.class);
@@ -554,56 +557,60 @@ class RuleFactoryTest {
     }
   }
 
-    @Test
-  void createByTransformations_shouldSkipPermanentLocation_whenItMatchesTemporaryLocation() throws TransformationRuleException {
-    // TestMate-43b50d3a607d8b4899bddee7a8e31991
+  @Test
+  @TestMate(name = "TestMate-43b50d3a607d8b4899bddee7a8e31991")
+  void createByTransformations_shouldSkipPermanentLocation_whenItMatchesTemporaryLocation()
+      throws TransformationRuleException {
     // Given
     var tempLocationFieldId = "holdings.temporarylocation.name";
     var permLocationFieldId = "holdings.permanentlocation.name";
     var transformationString = "952$a";
-    var tempLocationTransformation = createTransformations(true, tempLocationFieldId, RecordTypes.HOLDINGS);
+    var tempLocationTransformation =
+        createTransformations(true, tempLocationFieldId, RecordTypes.HOLDINGS);
     tempLocationTransformation.setTransformation(transformationString);
     tempLocationTransformation.setPath("$.holdings[*].temporaryLocation.name");
-    var permLocationTransformation = createTransformations(true, permLocationFieldId, RecordTypes.HOLDINGS);
+    var permLocationTransformation =
+        createTransformations(true, permLocationFieldId, RecordTypes.HOLDINGS);
     permLocationTransformation.setTransformation(transformationString);
     permLocationTransformation.setPath("$.holdings[*].permanentLocation.name");
     var mappingTransformations = List.of(tempLocationTransformation, permLocationTransformation);
     var defaultRules = new ArrayList<Rule>();
+
     // When
-    Set<Rule> actualRules = ruleFactory.createByTransformations(mappingTransformations, defaultRules);
+    Set<Rule> actualRules =
+        ruleFactory.createByTransformations(mappingTransformations, defaultRules);
+
     // Then
     assertThat(actualRules).hasSize(1);
     var rule = actualRules.iterator().next();
     assertThat(rule.getField()).isEqualTo("952");
   }
 
-    @ParameterizedTest
-  @CsvSource({
-    "false, $.instance.title",
-    "true, ''",
-    "true, ' '",
-    "true, "
-  })
-  void createByTransformations_shouldSkipInvalidOrDisabledTransformations(boolean enabled, String path) throws TransformationRuleException {
-    // TestMate-764f63826870cb2f364a904bbe4ad480
+  @ParameterizedTest
+  @TestMate(name = "TestMate-764f63826870cb2f364a904bbe4ad480")
+  @CsvSource({"false, $.instance.title", "true, ''", "true, ' '", "true, "})
+  void createByTransformations_shouldSkipInvalidOrDisabledTransformations(
+      boolean enabled, String path) throws TransformationRuleException {
     // Given
     var transformation = createTransformations(enabled, "instance.title", RecordTypes.INSTANCE);
     transformation.setPath(path);
     transformation.setTransformation("24500$a");
-    
+
     var mappingTransformations = List.of(transformation);
     var defaultRules = new ArrayList<Rule>();
+
     // When
-    Set<Rule> actualRules = ruleFactory.createByTransformations(mappingTransformations, defaultRules);
+    Set<Rule> actualRules =
+        ruleFactory.createByTransformations(mappingTransformations, defaultRules);
+
     // Then
-    assertThat(actualRules)
-        .isInstanceOf(LinkedHashSet.class)
-        .isEmpty();
+    assertThat(actualRules).isInstanceOf(LinkedHashSet.class).isEmpty();
   }
 
-    @Test
-  void createByTransformations_shouldPropagateTransformationRuleException() throws TransformationRuleException {
-    // TestMate-bb970097e4e31b2b14dcd68aeca6458a
+  @Test
+  @TestMate(name = "TestMate-bb970097e4e31b2b14dcd68aeca6458a")
+  void createByTransformations_shouldPropagateTransformationRuleException()
+      throws TransformationRuleException {
     // Given
     var transformation = createTransformations(true, "instance.title", RecordTypes.INSTANCE);
     transformation.setPath("$.title");
@@ -614,8 +621,10 @@ class RuleFactoryTest {
     doThrow(new TransformationRuleException("Builder failure"))
         .when(spyRuleFactory)
         .createDefaultByTransformations(eq(transformation), anyList());
+
     // When & Then
-    assertThatThrownBy(() -> spyRuleFactory.createByTransformations(mappingTransformations, defaultRules))
+    assertThatThrownBy(
+            () -> spyRuleFactory.createByTransformations(mappingTransformations, defaultRules))
         .isInstanceOf(TransformationRuleException.class)
         .hasMessage("Builder failure");
     verify(spyRuleFactory).createDefaultByTransformations(transformation, defaultRules);
