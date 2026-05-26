@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Setter;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -50,8 +51,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
-import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
-import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractMarcExportStrategyTest {
@@ -300,63 +299,65 @@ class AbstractMarcExportStrategyTest {
     assertEquals("123", jsonObject.getAsString("id"));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-b8ae0b8d758ea5c9d9ca6b4930897de9")
   void setStatusBaseExportStatisticShouldSetCompletedWhenNoFailures() {
-    // TestMate-b8ae0b8d758ea5c9d9ca6b4930897de9
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    var exportFilesEntity = JobExecutionExportFilesEntity.builder()
-        .id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-        .jobExecutionId(jobExecutionId)
-        .status(JobExecutionExportFilesStatus.ACTIVE)
-        .build();
-    var jobExecution = new JobExecution()
-        .id(jobExecutionId)
-        .progress(new JobExecutionProgress());
+    var jobExecution = new JobExecution().id(jobExecutionId).progress(new JobExecutionProgress());
     var jobExecutionEntity = new JobExecutionEntity();
     jobExecutionEntity.setId(jobExecutionId);
     jobExecutionEntity.setJobExecution(jobExecution);
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId))
+        .thenReturn(jobExecutionEntity);
     var listener = new ExportedRecordsListener(jobExecutionEntityRepository, 1, jobExecutionId);
     var exportStatistic = new ExportStrategyStatistic(listener);
     exportStatistic.incrementExported();
     exportStatistic.setFailed(0);
+    var exportFilesEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+            .jobExecutionId(jobExecutionId)
+            .status(JobExecutionExportFilesStatus.ACTIVE)
+            .build();
     // When
     exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
     // Then
     assertEquals(JobExecutionExportFilesStatus.COMPLETED, exportFilesEntity.getStatus());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-fbc1a4881deefd242cc63545b444866d")
   void setStatusBaseExportStatisticShouldSetCompletedWithErrorsWhenSomeFailuresExist() {
-    // TestMate-fbc1a4881deefd242cc63545b444866d
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    var exportFilesEntityId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var jobExecution = new JobExecution()
-        .id(jobExecutionId)
-        .progress(new JobExecutionProgress());
+    var jobExecution = new JobExecution().id(jobExecutionId).progress(new JobExecutionProgress());
     var jobExecutionEntity = new JobExecutionEntity();
     jobExecutionEntity.setId(jobExecutionId);
     jobExecutionEntity.setJobExecution(jobExecution);
-    var exportFilesEntity = JobExecutionExportFilesEntity.builder()
-        .id(exportFilesEntityId)
-        .jobExecutionId(jobExecutionId)
-        .status(JobExecutionExportFilesStatus.ACTIVE)
-        .build();
     // Mock behavior must be defined before calling incrementExported() because the listener
     // attempts to access the repository immediately when progressExportedUpdateStep is reached.
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId))
+        .thenReturn(jobExecutionEntity);
     var listener = new ExportedRecordsListener(jobExecutionEntityRepository, 1, jobExecutionId);
     var exportStatistic = new ExportStrategyStatistic(listener);
-    // To achieve COMPLETED_WITH_ERRORS status, there must be at least one successfully exported record.
+    // To achieve COMPLETED_WITH_ERRORS status, there must be at least one successfully exported
+    // record.
     // Otherwise, if exported count is 0 and failed count > 0, the status becomes FAILED.
     exportStatistic.incrementExported();
     exportStatistic.setFailed(5);
+    var exportFilesEntityId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var exportFilesEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportFilesEntityId)
+            .jobExecutionId(jobExecutionId)
+            .status(JobExecutionExportFilesStatus.ACTIVE)
+            .build();
     // When
     exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
     // Then
-    assertEquals(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS, exportFilesEntity.getStatus());
+    assertEquals(
+        JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS, exportFilesEntity.getStatus());
   }
 
   class TestExportStrategy extends AbstractMarcExportStrategy {
