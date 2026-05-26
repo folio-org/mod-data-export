@@ -3,7 +3,9 @@ package org.folio.dataexp.service.export;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -295,5 +297,27 @@ class LocalStorageWriterTest {
           .hasMessageStartingWith("Error in deleting file: ")
           .hasMessageContaining(errorMessage);
     }
+  }
+
+  @Test
+  @TestMate(name = "TestMate-373236afc30071916753e3f8832407fc")
+  @SneakyThrows
+  void testWriteWhenBufferedWriterThrowsIOExceptionShouldDeleteFile() {
+    // Given
+    var fileName = "io_exception_test.mrc";
+    var localStorageWriter = createWriter(fileName);
+    var filePath = resolveFile(fileName);
+    var bufferedWriterMock = mock(BufferedWriter.class);
+    doThrow(new IOException("Disk full")).when(bufferedWriterMock).append(anyString());
+    ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterMock);
+    assertThat(filePath).exists();
+
+    // When
+    localStorageWriter.write("valid data");
+
+    // Then
+    assertThat(filePath).doesNotExist();
+    verify(bufferedWriterMock).append("valid data");
+    verify(bufferedWriterMock).close();
   }
 }
