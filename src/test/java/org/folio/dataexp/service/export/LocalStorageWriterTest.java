@@ -3,7 +3,9 @@ package org.folio.dataexp.service.export;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -23,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 
 class LocalStorageWriterTest {
 
@@ -299,10 +299,10 @@ class LocalStorageWriterTest {
     }
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-373236afc30071916753e3f8832407fc")
   @SneakyThrows
   void testWriteWhenBufferedWriterThrowsIOExceptionShouldDeleteFile() {
-    // TestMate-373236afc30071916753e3f8832407fc
     // Given
     var fileName = "io_exception_test.mrc";
     var localStorageWriter = createWriter(fileName);
@@ -311,8 +311,10 @@ class LocalStorageWriterTest {
     doThrow(new IOException("Disk full")).when(bufferedWriterMock).append(anyString());
     ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterMock);
     assertThat(filePath).exists();
+
     // When
     localStorageWriter.write("valid data");
+
     // Then
     assertThat(filePath).doesNotExist();
     verify(bufferedWriterMock).append("valid data");
