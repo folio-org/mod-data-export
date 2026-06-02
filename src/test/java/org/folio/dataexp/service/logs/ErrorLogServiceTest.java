@@ -540,9 +540,9 @@ class ErrorLogServiceTest {
   }
 
   @ParameterizedTest
+  @TestMate(name = "TestMate-08ee9a7528ddf18f0a322d5db9a6b61a")
   @NullAndEmptySource
   void getErrorLogsByQueryWhenQueryIsEmptyShouldUseAllRecordsConst(String query) {
-    // TestMate-08ee9a7528ddf18f0a322d5db9a6b61a
     // Given
     int offset = 0;
     int limit = 10;

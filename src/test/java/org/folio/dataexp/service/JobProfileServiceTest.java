@@ -944,8 +944,8 @@ class JobProfileServiceTest {
   }
 
   @Test
+  @TestMate(name = "TestMate-09489a728d9d6346b40fd70f88cf5915")
   void getJobProfilesShouldReturnUsedJobProfilesWhenUsedIsTrue() {
-    // TestMate-09489a728d9d6346b40fd70f88cf5915
     // Given
     var offset = 0;
     var limit = 10;
@@ -968,8 +968,8 @@ class JobProfileServiceTest {
   }
 
   @Test
+  @TestMate(name = "TestMate-16400b16bf1a763aab0f8854d5c4d9f6")
   void getJobProfilesShouldReturnAllProfilesWhenUsedIsFalseAndQueryIsEmpty() {
-    // TestMate-16400b16bf1a763aab0f8854d5c4d9f6
     // Given
     var used = FALSE;
     var query = "";
