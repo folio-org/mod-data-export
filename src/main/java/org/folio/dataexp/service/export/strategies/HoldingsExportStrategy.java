@@ -324,7 +324,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
     ids.forEach(
         id -> {
           var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
-          log.info(
+          log.debug(
               "ID: {}, tenant: {}, actualTenant: {}",
               id,
               curTenant,

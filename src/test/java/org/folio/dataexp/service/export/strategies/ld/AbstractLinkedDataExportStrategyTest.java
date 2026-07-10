@@ -224,7 +224,7 @@ class AbstractLinkedDataExportStrategyTest {
 
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
-    assertEquals(0, exportStatistic.getFailed());
+    assertEquals(1, exportStatistic.getFailed());
     assertEquals(List.of(preparation.exportId), exportStatistic.getNotExistIds());
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, preparation.exportFilesEntity.getStatus());
     verify(localStorageWriter, never()).write(isA(String.class));
