@@ -1,5 +1,12 @@
 ## v5.5.0 Unreleased
 
+## 07/22/2026 v5.4.5 Released
+
+This release contains fix for error duplicates to apply error_logs_unique_idx index
+
+### Bugs
+[MDEXP-924](https://folio-org.atlassian.net/browse/MDEXP-924) Clean up error duplicates to apply error_logs_unique_idx index
+
 ## 05/25/2026 v5.4.4 Released
 
 This release contains bug fixes
