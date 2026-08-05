@@ -779,6 +779,15 @@
       "visible": false
     }
   ],
+  "metadata": {
+    "user": {
+      "type": "system",
+      "permissions": [
+        "base-url.item.get",
+        "okapi.proxy.self.timers.patch"
+      ]
+    }
+  },
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",
     "dockerPull": false,
