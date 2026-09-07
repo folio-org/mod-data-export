@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.AffectedRecord;
 import org.folio.dataexp.domain.dto.ErrorLog;
@@ -40,7 +40,7 @@ import tools.jackson.databind.ObjectMapper;
 /** Service for managing error logs, including saving, updating, and retrieving error logs. */
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class ErrorLogService {
   public static final String ID = "id";
   public static final String HRID = "hrid";
@@ -112,7 +112,8 @@ public class ErrorLogService {
           errorLog.getJobExecutionId(),
           jobProfileId);
     } catch (JacksonException e) {
-      log.error("Error log was not inserted: {}", e.getMessage());
+      log.error("save:: Error log was not inserted jobExecutionId {} errorCode {}",
+          errorLog.getJobExecutionId(), errorLog.getErrorMessageCode(), e);
     }
     return errorLog;
   }

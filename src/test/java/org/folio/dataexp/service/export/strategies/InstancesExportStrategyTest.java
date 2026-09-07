@@ -307,6 +307,63 @@ class InstancesExportStrategyTest {
   }
 
   @Test
+  void getGeneratedMarcShouldNotAbortJobWhenErrorRecordBuildingThrows()
+      throws TransformationRuleException {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setTransformations(List.of(new Transformations()));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
+
+    var defaultMappingProfile = new MappingProfile();
+    defaultMappingProfile.setDefault(true);
+    defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var defaultMappingProfileEntity =
+        MappingProfileEntity.builder()
+            .mappingProfile(defaultMappingProfile)
+            .id(defaultMappingProfile.getId())
+            .build();
+
+    var instanceEntity =
+        InstanceEntity.builder()
+            .jsonb("{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}")
+            .id(UUID.randomUUID())
+            .build();
+    var jobExecutionId = UUID.randomUUID();
+
+    when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(defaultMappingProfileEntity);
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    doThrow(new MarcException())
+        .when(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    // reproduce the reported ClassCastException raised while building the affected-record entry
+    doThrow(
+            new ClassCastException(
+                "class java.lang.String cannot be cast to class java.lang.Boolean"))
+        .when(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class), isA(String.class), any(), isA(MarcException.class));
+
+    var generatedMarcResult =
+        instancesExportStrategy.getGeneratedMarc(
+            new HashSet<>(),
+            mappingProfile,
+            new ExportRequest(),
+            jobExecutionId,
+            new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+
+    // job did not abort: the broken instance is reported exactly once and export continues
+    var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    assertEquals(List.of(instanceId), generatedMarcResult.getFailedIds());
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+            List.of(instanceId.toString()),
+            jobExecutionId);
+  }
+
+  @Test
   void getInstancesWithHoldingsAndItemsTest() {
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");

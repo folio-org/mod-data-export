@@ -33,7 +33,7 @@ public class ConfigurationService {
     var entity =
         ConfigurationEntity.builder().key(config.getKey()).value(config.getValue()).build();
     var saved = configurationRepository.save(entity);
-    log.info("Upserted successfully: {}", saved.getValue());
+    log.debug("Upserted successfully: {}", saved.getValue());
     return new Config().key(saved.getKey()).value(saved.getValue());
   }
 

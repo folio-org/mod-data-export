@@ -130,7 +130,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     if (identifiers.isPresent() && Objects.isNull(identifiers.get().getAssociatedJsonObject())) {
       var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
       if (auditInstances.isEmpty()) {
-        log.info("getIdentifiers:: not found for instance by id {}", id);
+        log.debug("getIdentifiers:: not found for instance by id {}", id);
         return getDefaultIdentifiers(id);
       }
       var auditInstance = auditInstances.get(0);
@@ -169,19 +169,10 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
             e.getMessage(),
             ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
             jobExecutionId);
-        log.error(
-            "Error converting record to marc "
-                + marcRecordEntity.getExternalId()
-                + " : "
-                + e.getMessage());
         errorLogService.saveGeneralErrorWithMessageValues(
             ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(),
             List.of(marcRecordEntity.getId().toString()),
             jobExecutionId);
-        log.error(
-            String.format(
-                ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(),
-                marcRecordEntity.getId()));
       } else {
         super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
       }
@@ -251,7 +242,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         mappingProfile,
         folioSlice.getContent(),
         localStorageWriter);
-    log.info("Slice size for instances export all folio: {}", folioSlice.getContent().size());
+    log.debug("Slice size for instances export all folio: {}", folioSlice.getContent().size());
     while (folioSlice.hasNext()) {
       folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, folioSlice.nextPageable());
       entityManager.clear();
@@ -306,7 +297,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         mappingProfile,
         marcInstanceSlice.getContent(),
         localStorageWriter);
-    log.info(
+    log.debug(
         "Slice size for marc instances export all marc: {}", marcInstanceSlice.getContent().size());
     while (marcInstanceSlice.hasNext()) {
       marcInstanceSlice =
@@ -329,7 +320,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       LocalStorageWriter localStorageWriter) {
     var externalIds =
         marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-    log.info("processMarcInstances instances all externalIds: {}", externalIds.size());
+    log.debug("processMarcInstances instances all externalIds: {}", externalIds.size());
     createAndSaveMarcFromJsonRecord(
         externalIds,
         exportStatistic,
