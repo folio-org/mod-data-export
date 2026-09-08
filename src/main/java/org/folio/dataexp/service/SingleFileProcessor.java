@@ -83,6 +83,8 @@ public class SingleFileProcessor {
       Files.createDirectories(
           Path.of(S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecutionId)));
     } catch (IOException e) {
+      log.error(
+          "process:: failed to create temp directory for jobExecutionId {}", jobExecutionId, e);
       throw new DataExportException(
           "Can not create temp directory for job execution " + jobExecutionId);
     }

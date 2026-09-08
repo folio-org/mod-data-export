@@ -547,4 +547,91 @@ class HoldingsExportStrategyTest {
         .containsExactly("Simulated failure for holding " + holdingId2);
     verify(ruleProcessor, times(2)).process(any(), any(), any(), any(), any());
   }
+
+  @Test
+  @SneakyThrows
+  void getHoldingsWithInstanceAndItems_whenHoldingTenantNotAffiliatedTest() {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
+    var holdings = new Holdings();
+    holdings.setTenantId("college");
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    var userId = UUID.randomUUID();
+    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+
+    when(folioExecutionContext.getTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId("central")).thenReturn("central");
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(consortiumSearchClient.getHoldingsById(holdingId.toString())).thenReturn(holdings);
+    when(consortiaService.getAffiliatedTenants("central", userId.toString()))
+        .thenReturn(List.of("university"));
+    when(userService.getUserName("central", userId.toString())).thenReturn("central_admin");
+    doNothing().when(holdingsExportStrategy.entityManager).clear();
+
+    var result =
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+
+    assertEquals(0, result.size());
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            eq(ErrorCode.ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getCode()),
+            anyList(),
+            eq(jobExecutionId));
+    assertEquals(List.of(holdingId), generatedMarcResult.getNotExistIds());
+  }
+
+  @Test
+  @SneakyThrows
+  void getHoldingsWithInstanceAndItems_whenTenantNotFoundForHoldingTest() {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    var userId = UUID.randomUUID();
+    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+
+    when(folioExecutionContext.getTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId("central")).thenReturn("central");
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    // Holdings without tenantId -> tenant cannot be resolved for the holding
+    when(consortiumSearchClient.getHoldingsById(holdingId.toString())).thenReturn(new Holdings());
+    when(consortiaService.getAffiliatedTenants("central", userId.toString()))
+        .thenReturn(List.of("college"));
+    doNothing().when(holdingsExportStrategy.entityManager).clear();
+
+    var result =
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+
+    assertEquals(0, result.size());
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(),
+            List.of(holdingId.toString()),
+            jobExecutionId);
+    assertEquals(List.of(holdingId), generatedMarcResult.getNotExistIds());
+  }
+
+  @Test
+  void getHoldingsWithInstanceAndItems_whenHoldingDoesNotExistTest() {
+    var holdingId = UUID.randomUUID();
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+
+    when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
+    doNothing().when(holdingsExportStrategy.entityManager).clear();
+
+    var result =
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)),
+            generatedMarcResult,
+            new MappingProfile(),
+            jobExecutionId);
+
+    assertEquals(0, result.size());
+    assertEquals(List.of(holdingId), generatedMarcResult.getNotExistIds());
+    assertEquals(List.of(holdingId), generatedMarcResult.getFailedIds());
+  }
 }

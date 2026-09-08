@@ -1,7 +1,7 @@
 package org.folio.dataexp.service.validators;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.service.permissions.PermissionsProvider;
 import org.folio.dataexp.service.permissions.RequiredPermissionResolver;
 import org.folio.spring.FolioExecutionContext;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /** Validator for checking user permissions related to instance view. */
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class PermissionsValidator {
 
   private final PermissionsProvider permissionsProvider;
@@ -54,7 +54,7 @@ public class PermissionsValidator {
     var userPermissions =
         permissionsProvider.getUserPermissions(
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    log.info("userPermissions: {}", userPermissions);
+    log.debug("checkLockJobProfilePermission:: userPermissions count: {}", userPermissions.size());
     return userPermissions.contains(lockPermission);
   }
 
@@ -71,7 +71,8 @@ public class PermissionsValidator {
     var userPermissions =
         permissionsProvider.getUserPermissions(
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    log.info("userPermissions: {}", userPermissions);
+    log.debug(
+        "checkLockMappingProfilePermission:: userPermissions count: {}", userPermissions.size());
     return userPermissions.contains(lockPermission);
   }
 }

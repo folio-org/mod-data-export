@@ -172,7 +172,6 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
         mappingProfile,
         folioSlice.getContent(),
         localStorageWriter);
-    log.info("Slice size for holdings export all folio: {}", folioSlice.getContent().size());
     while (folioSlice.hasNext()) {
       folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, folioSlice.nextPageable());
       entityManager.clear();
@@ -201,7 +200,6 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
           mappingProfile,
           marcSlice.getContent(),
           localStorageWriter);
-      log.info("Slice size for holdings export all marc: {}", marcSlice.getContent().size());
       while (marcSlice.hasNext()) {
         marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
         entityManager.clear();
@@ -230,7 +228,6 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
         mappingProfile,
         marcHoldingsSlice.getContent(),
         localStorageWriter);
-    log.info("Slice size for holdings export all marc: {}", marcHoldingsSlice.getContent().size());
     while (marcHoldingsSlice.hasNext()) {
       marcHoldingsSlice =
           nextMarcHoldingsSlice(exportFilesEntity, exportRequest, marcHoldingsSlice.nextPageable());
