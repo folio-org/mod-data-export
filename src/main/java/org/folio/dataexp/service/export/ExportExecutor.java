@@ -7,6 +7,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.logging.log4j.CloseableThreadContext;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
@@ -67,31 +68,39 @@ public class ExportExecutor {
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
       CommonExportStatistic commonExportStatistic) {
-    log.info(
-        "export:: Started export {} for job execution {}",
-        exportFilesEntity.getFileLocation(),
-        exportFilesEntity.getJobExecutionId());
-    exportFilesEntity =
-        jobExecutionExportFilesEntityRepository.getReferenceById(exportFilesEntity.getId());
-    exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
-    jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
-    var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic =
-        exportStrategy.saveOutputToLocalStorage(
-            exportFilesEntity, exportRequest, commonExportStatistic.getExportedRecordsListener());
-    commonExportStatistic.addToNotExistUuidAll(exportStatistic.getNotExistIds());
-    synchronized (this) {
-      exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
-      jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
+    try (var ignored =
+        CloseableThreadContext.put(
+            "jobExecutionId", exportFilesEntity.getJobExecutionId().toString())) {
       log.info(
-          "export:: Complete export {} for job execution {}",
+          "export:: Started export {} for job execution {}",
           exportFilesEntity.getFileLocation(),
           exportFilesEntity.getJobExecutionId());
-      updateJobExecutionStatusAndProgress(
-          exportFilesEntity.getJobExecutionId(),
-          exportStatistic,
-          commonExportStatistic,
-          exportRequest);
+      exportFilesEntity =
+          jobExecutionExportFilesEntityRepository.getReferenceById(exportFilesEntity.getId());
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
+      jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
+      var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
+      var exportStatistic =
+          exportStrategy.saveOutputToLocalStorage(
+              exportFilesEntity, exportRequest, commonExportStatistic.getExportedRecordsListener());
+      commonExportStatistic.addToNotExistUuidAll(exportStatistic.getNotExistIds());
+      synchronized (this) {
+        exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
+        jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
+        log.info(
+            "export:: Complete export {} for job execution {}"
+                + " exported={} failed={} duplicatedSrs={}",
+            exportFilesEntity.getFileLocation(),
+            exportFilesEntity.getJobExecutionId(),
+            exportStatistic.getExported(),
+            exportStatistic.getFailed(),
+            exportStatistic.getDuplicatedSrs());
+        updateJobExecutionStatusAndProgress(
+            exportFilesEntity.getJobExecutionId(),
+            exportStatistic,
+            commonExportStatistic,
+            exportRequest);
+      }
     }
   }
 
@@ -143,14 +152,16 @@ public class ExportExecutor {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       } else {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
-        log.error(
-            "export size: {}, errorCount: {}, exportsCompleted: {}, "
-                + "exportsCompletedWithErrors: {}, jobExecution: {}",
+        log.warn(
+            "updateJobExecutionStatusAndProgress:: export size: {}, errorCount: {},"
+                + " exportsCompleted: {}, exportsCompletedWithErrors: {},"
+                + " jobExecutionId: {}, status: {}",
             exports.size(),
             errorCount,
             exportsCompleted,
             exportsCompletedWithErrors,
-            jobExecution);
+            jobExecution.getId(),
+            jobExecution.getStatus());
       }
       var filesForExport =
           exports.stream()
@@ -182,10 +193,9 @@ public class ExportExecutor {
             List.of(ErrorCode.NO_FILE_GENERATED.getDescription()),
             jobExecutionId);
         log.error(
-            "updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} "
-                + "with exception {}",
+            "updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {}",
             jobExecutionId,
-            e.getMessage());
+            e);
       }
       jobExecution.completedDate(currentDate);
       storageCleanUpService.cleanExportIdEntities(jobExecutionId);
@@ -193,7 +203,7 @@ public class ExportExecutor {
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionService.save(jobExecution);
     log.info(
-        "Job execution by id {} is updated with status {}",
+        "updateJobExecutionStatusAndProgress:: Job execution {} updated with status {}",
         jobExecutionId,
         jobExecution.getStatus());
   }

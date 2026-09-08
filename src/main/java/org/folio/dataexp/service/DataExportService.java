@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.logging.log4j.CloseableThreadContext;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -94,7 +95,13 @@ public class DataExportService {
     } catch (DataExportRequestValidationException e) {
       updateJobExecutionForPostDataExport(
           jobExecution, JobExecution.StatusEnum.FAIL, exportRequest);
-      log.error(e.getMessage());
+      log.warn(
+          "postDataExport:: validation failed for fileDefinitionId {} jobProfileId {}"
+              + " jobExecutionId {}: {}",
+          exportRequest.getFileDefinitionId(),
+          exportRequest.getJobProfileId(),
+          jobExecution.getId(),
+          e.getMessage());
       return;
     }
     log.info(
@@ -110,20 +117,24 @@ public class DataExportService {
     executor.execute(
         getRunnableWithCurrentFolioContext(
             () -> {
-              if (Boolean.FALSE.equals(exportRequest.getAll())
-                  && Boolean.FALSE.equals(exportRequest.getQuick())) {
-                inputFileProcessor.readFile(
-                    fileDefinition, commonExportFails, exportRequest.getIdType());
-                log.info("File has been read successfully.");
-              }
-              slicerProcessor.sliceInstancesIds(
-                  fileDefinition, exportRequest, mappingProfileEntity.getFormat());
-              log.info("Instance IDs have been sliced successfully.");
+              try (var ignored =
+                  CloseableThreadContext.put(
+                      "jobExecutionId", jobExecution.getId().toString())) {
+                if (Boolean.FALSE.equals(exportRequest.getAll())
+                    && Boolean.FALSE.equals(exportRequest.getQuick())) {
+                  inputFileProcessor.readFile(
+                      fileDefinition, commonExportFails, exportRequest.getIdType());
+                  log.info("postDataExport:: file read successfully");
+                }
+                slicerProcessor.sliceInstancesIds(
+                    fileDefinition, exportRequest, mappingProfileEntity.getFormat());
+                log.info("postDataExport:: instance IDs sliced successfully");
 
-              updateJobExecutionForPostDataExport(
-                  jobExecution, JobExecution.StatusEnum.IN_PROGRESS, exportRequest);
-              singleFileProcessorAsync.exportBySingleFile(
-                  jobExecution.getId(), exportRequest, commonExportFails);
+                updateJobExecutionForPostDataExport(
+                    jobExecution, JobExecution.StatusEnum.IN_PROGRESS, exportRequest);
+                singleFileProcessorAsync.exportBySingleFile(
+                    jobExecution.getId(), exportRequest, commonExportFails);
+              }
             }));
   }
 

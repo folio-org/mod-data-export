@@ -206,38 +206,82 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
     try {
       rules = getRules(mappingProfile);
     } catch (TransformationRuleException e) {
-      log.error(e);
+      log.error(
+          "getGeneratedMarc:: TransformationRuleException for jobExecutionId {}",
+          jobExecutionId, e);
       errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
       return generatedMarcResult;
     }
     for (var jsonObject : instancesWithHoldingsAndItems) {
       try {
-        var marc = mapToMarc(jsonObject, rules, referenceData);
-        marcRecords.add(marc);
-      } catch (MarcException e) {
-        var instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
-        log.debug("getGeneratedMarc instanceJson: {}", instanceJson);
-        var uuid = instanceJson.getAsString(ID_KEY);
-        generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
-        errorLogService.saveWithAffectedRecord(
-            instanceJson,
+        convertInstanceToMarc(
+            jsonObject, rules, referenceData, marcRecords, generatedMarcResult, jobExecutionId);
+      } catch (RuntimeException e) {
+        // Any unexpected failure for a single instance (e.g. a non-boolean 'deleted' flag that
+        // breaks error-record building) must not abort the whole async export job: record the
+        // broken instance UUID in the job error log and keep processing the rest.
+        var uuid = extractInstanceId(jsonObject);
+        // No stack trace: this can recur per record on a large dataset; the id lands in the
+        // job error log below.
+        log.warn(
+            "getGeneratedMarc:: jobExecutionId {} error converting instance {} to marc: {}",
+            jobExecutionId, uuid, e.getMessage());
+        addFailedInstanceId(generatedMarcResult, uuid);
+        errorLogService.saveGeneralErrorWithMessageValues(
             ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
-            jobExecutionId,
-            e);
-        log.error(
-            " getGeneratedMarc:: exception to convert in marc : {} for instance {}",
-            e.getMessage(),
-            uuid);
-        if (instanceJson.containsKey(DELETED_KEY) && (boolean) instanceJson.get(DELETED_KEY)) {
-          errorLogService.saveGeneralErrorWithMessageValues(
-              ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid), jobExecutionId);
-          log.error(
-              String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), uuid));
-        }
+            List.of(uuid == null ? "unknown" : uuid),
+            jobExecutionId);
       }
     }
     generatedMarcResult.setMarcRecords(marcRecords);
     return generatedMarcResult;
+  }
+
+  private void convertInstanceToMarc(
+      JSONObject jsonObject,
+      List<Rule> rules,
+      ReferenceDataWrapper referenceData,
+      List<String> marcRecords,
+      GeneratedMarcResult generatedMarcResult,
+      UUID jobExecutionId) {
+    try {
+      var marc = mapToMarc(jsonObject, rules, referenceData);
+      marcRecords.add(marc);
+    } catch (MarcException e) {
+      var instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
+      var uuid = instanceJson.getAsString(ID_KEY);
+      log.error(
+          "getGeneratedMarc:: jobExecutionId {} exception to convert in marc for instance {}: {}",
+          jobExecutionId, uuid, e.getMessage());
+      errorLogService.saveWithAffectedRecord(
+          instanceJson,
+          ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+          jobExecutionId,
+          e);
+      if (instanceJson.containsKey(DELETED_KEY) && (boolean) instanceJson.get(DELETED_KEY)) {
+        errorLogService.saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid), jobExecutionId);
+      }
+      // Mark as failed only once the failure has been recorded, so that if error-record building
+      // itself blows up the outer handler adds the id exactly once.
+      generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
+    }
+  }
+
+  private static String extractInstanceId(JSONObject jsonObject) {
+    var instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
+    return instanceJson == null ? null : instanceJson.getAsString(ID_KEY);
+  }
+
+  private static void addFailedInstanceId(GeneratedMarcResult generatedMarcResult, String uuid) {
+    if (uuid == null) {
+      return;
+    }
+    try {
+      generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
+    } catch (IllegalArgumentException ignored) {
+      // instance id is not a valid UUID - it is still reported in the job error log above
+    }
   }
 
   /**
@@ -250,7 +294,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
   public Optional<ExportIdentifiersForDuplicateError> getIdentifiers(UUID id) {
     var instances = instanceEntityRepository.findByIdIn(Set.of(id));
     if (instances.isEmpty()) {
-      log.info("getIdentifiers:: not found for instance by id {}", id);
+      log.debug("getIdentifiers:: not found for instance by id {}", id);
       return getDefaultIdentifiers(id);
     }
     var jsonObject = getAsJsonObject(instances.get(0).getJsonb());
@@ -292,11 +336,6 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
             e.getMessage(),
             ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
             jobExecutionId);
-        log.error(
-            "Error converting record to marc "
-                + marcRecordEntity.getExternalId()
-                + " : "
-                + e.getMessage());
         return;
       }
     }
@@ -521,7 +560,9 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       if (instanceJsonOpt.isEmpty()) {
         var errorMessage =
             String.format(ERROR_CONVERTING_TO_JSON_INSTANCE.getDescription(), instance.getId());
-        log.error("getInstancesWithHoldingsAndItems:: {}", errorMessage);
+        log.error(
+            "getInstancesWithHoldingsAndItems:: jobExecutionId {} {}",
+            generatedMarcResult.getJobExecutionId(), errorMessage);
         generatedMarcResult.addIdToFailed(instance.getId());
         errorLogService.saveGeneralError(errorMessage, generatedMarcResult.getJobExecutionId());
         continue;
@@ -529,7 +570,6 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
-      log.debug("getInstancesWithHoldingsAndItems instanceJson: {}", instanceJson);
 
       if (!instancesIdsFromCentral.contains(instance.getId())) {
         holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(
@@ -543,13 +583,16 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     instancesIds.removeAll(existInstanceIds);
-    instancesIds.forEach(
-        instanceId -> {
-          log.error(
-              "getInstancesWithHoldingsAndItems:: instance by id {} does not exist", instanceId);
-          generatedMarcResult.addIdToNotExist(instanceId);
-          generatedMarcResult.addIdToFailed(instanceId);
-        });
+    if (!instancesIds.isEmpty()) {
+      log.warn(
+          "getInstancesWithHoldingsAndItems:: jobExecutionId {} {} instance(s) do not exist: {}",
+          generatedMarcResult.getJobExecutionId(), instancesIds.size(), instancesIds);
+      instancesIds.forEach(
+          instanceId -> {
+            generatedMarcResult.addIdToNotExist(instanceId);
+            generatedMarcResult.addIdToFailed(instanceId);
+          });
+    }
     return instancesWithHoldingsAndItems;
   }
 
@@ -574,7 +617,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
         (translationException -> {
           var instanceJson = (JSONObject) jsonObject.get(INSTANCE_KEY);
           log.warn(
-              "mapToSrs:: exception: {} for instance {}",
+              "mapToMarc:: exception: {} for instance {}",
               translationException.getCause().getMessage(),
               instanceJson.getAsString(ID_KEY));
         }));

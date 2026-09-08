@@ -76,6 +76,9 @@ public class InputFileProcessor {
         readCsvFile(fileDefinition, commonExportStatistic);
       }
     } catch (Exception e) {
+      log.error(
+          "readFile:: jobExecutionId {} failed to read file",
+          fileDefinition.getJobExecutionId(), e);
       throw new DataExportException(e.getMessage());
     }
   }
@@ -115,7 +118,8 @@ public class InputFileProcessor {
       jobExecutionService.save(jobExecution);
     } catch (Exception e) {
       commonExportStatistic.setFailedToReadInputFile(true);
-      log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
+      log.error("readCsvFile:: counting lines failed for file definition {} jobExecutionId {}",
+          fileDefinition.getId(), fileDefinition.getJobExecutionId(), e);
     }
     var batch = new ArrayList<ExportIdEntity>();
     var readIds = new HashSet<>();
@@ -146,7 +150,11 @@ public class InputFileProcessor {
                     duplicatedIds.put(entity.getInstanceId(), countDuplicated);
                   }
                 } catch (Exception e) {
-                  log.error("Error converting {} to uuid", instanceId);
+                  // Per-line detail only at debug (no stack trace); the aggregate count is
+                  // logged once below.
+                  log.debug(
+                      "readCsvFile:: skipping line with invalid uuid: {} ({})",
+                      instanceId, e.getMessage());
                   commonExportStatistic.addToInvalidUuidFormat(instanceId);
                 }
                 if (batch.size() == BATCH_SIZE_TO_SAVE) {
@@ -157,6 +165,15 @@ public class InputFileProcessor {
                 }
               });
       readIds.clear();
+      var invalidUuidCount = commonExportStatistic.getInvalidUuidFormat().size();
+      if (invalidUuidCount > 0) {
+        log.warn(
+            "readCsvFile:: {} line(s) with invalid uuid skipped for file definition {}"
+                + " jobExecutionId {}",
+            invalidUuidCount,
+            fileDefinition.getId(),
+            fileDefinition.getJobExecutionId());
+      }
       for (var entry : duplicatedIds.entrySet()) {
         errorLogService.saveGeneralErrorWithMessageValues(
             ERROR_DUPLICATED_IDS.getCode(),
@@ -166,7 +183,8 @@ public class InputFileProcessor {
       duplicatedIds.clear();
     } catch (Exception e) {
       commonExportStatistic.setFailedToReadInputFile(true);
-      log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
+      log.error("readCsvFile:: reading ids failed for file definition {} jobExecutionId {}",
+          fileDefinition.getId(), fileDefinition.getJobExecutionId(), e);
     }
     insertExportIdService.saveBatch(batch);
     progress.setReadIds(countOfRead.get());
@@ -249,21 +267,24 @@ public class InputFileProcessor {
             jobExecutionService.save(jobExecution);
           }
         } else if (jobStatus == IdsJob.Status.ERROR) {
-          log.error(ERROR_INVALID_CQL_SYNTAX.getDescription(), fileDefinition.getFileName());
+          log.error(
+              "readCqlFile:: jobExecutionId {} invalid CQL syntax in file {}",
+              fileDefinition.getJobExecutionId(),
+              fileDefinition.getFileName());
           errorLogService.saveGeneralErrorWithMessageValues(
               ERROR_INVALID_CQL_SYNTAX.getCode(),
               Collections.singletonList(fileDefinition.getFileName()),
               fileDefinition.getJobExecutionId());
         }
-        log.info(
-            "IdsJob.Status from mod-search: {}, file definition id: {}",
+        log.debug(
+            "readCqlFile:: IdsJob status from mod-search: {}, file definition id: {}",
             jobStatus,
             fileDefinition.getId());
       } catch (Exception exc) {
         log.error(
-            "Error occurred while CQL export: {}, file definition id: {}",
-            exc.getMessage(),
-            fileDefinition.getId());
+            "Error occurred while CQL export for file definition id: {}",
+            fileDefinition.getId(),
+            exc);
       }
     }
   }

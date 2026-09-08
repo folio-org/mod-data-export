@@ -1,7 +1,6 @@
 package org.folio.dataexp.controllers;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.QuickExportRequest;
 import org.folio.dataexp.domain.dto.QuickExportResponse;
 import org.folio.dataexp.rest.resource.QuickExportApi;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller for quick export operations. */
 @RestController
 @RequiredArgsConstructor
-@Log4j2
 @RequestMapping("/data-export")
 public class QuickExportController implements QuickExportApi {
 
@@ -30,7 +28,6 @@ public class QuickExportController implements QuickExportApi {
   public ResponseEntity<QuickExportResponse> postDataExportQuickExport(
       QuickExportRequest quickExportRequest) {
     var response = quickExportService.postQuickExport(quickExportRequest);
-    log.info("Quick export response: {}", response);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

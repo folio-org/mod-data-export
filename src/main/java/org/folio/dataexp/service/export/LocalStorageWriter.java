@@ -9,10 +9,12 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 
 /** Writer for local storage files, used for temporary export file creation. */
+@Log4j2
 public class LocalStorageWriter extends StringWriter {
   private final File tmp;
   private final Path path;
@@ -30,6 +32,7 @@ public class LocalStorageWriter extends StringWriter {
       this.tmp = Files.createFile(this.path).toFile();
       this.writer = new BufferedWriter(new FileWriter(this.tmp), size);
     } catch (Exception ex) {
+      log.error("LocalStorageWriter:: failed to create file {}", path, ex);
       throw new LocalStorageWriterException(
           "Files buffer cannot be created due to error: " + ex.getMessage());
     }
@@ -40,6 +43,7 @@ public class LocalStorageWriter extends StringWriter {
     try {
       return Optional.of(Files.newBufferedReader(this.path));
     } catch (Exception e) {
+      log.error("getReader:: failed to open file {}", this.path, e);
       return Optional.empty();
     }
   }
@@ -60,6 +64,7 @@ public class LocalStorageWriter extends StringWriter {
       try {
         writer.append(data);
       } catch (IOException e) {
+        log.error("write:: failed to write to file {}", this.path, e);
         deleteTmp(tmp);
       }
     } else {
@@ -75,6 +80,7 @@ public class LocalStorageWriter extends StringWriter {
         writer.close();
       }
     } catch (Exception ex) {
+      log.error("close:: failed to close file {}", this.path, ex);
       throw new LocalStorageWriterException("Error while close(): " + ex.getMessage());
     }
   }
@@ -89,6 +95,7 @@ public class LocalStorageWriter extends StringWriter {
       close();
       Files.deleteIfExists(tmp.toPath());
     } catch (IOException ex) {
+      log.error("deleteTmp:: failed to delete file {}", tmp.toPath(), ex);
       throw new LocalStorageWriterException("Error in deleting file: " + ex.getMessage());
     }
   }

@@ -119,7 +119,10 @@ public class HoldingsItemsResolverService {
     removeNotAffiliatedTenants(consortiaHoldingsIdsPerTenant, instanceId, jobExecutionId);
     removeNotPermittedTenants(consortiaHoldingsIdsPerTenant, instanceId, jobExecutionId);
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
-      log.debug("entry: {}", entry);
+      log.debug(
+          "retrieveHoldingsAndItemsByInstanceIdForCentralTenant:: tenant {} holdings count {}",
+          entry.getKey(),
+          entry.getValue().size());
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
       var holdingsEntities =
@@ -155,7 +158,7 @@ public class HoldingsItemsResolverService {
               instanceId,
               userName,
               notAffiliatedTenantsAsStr);
-      log.error(errorMessage);
+      log.warn("removeNotAffiliatedTenants:: jobExecutionId {} {}", jobExecutionId, errorMessage);
       notAffiliatedTenants.forEach(consortiaHoldingsIdsPerTenant::remove);
     }
   }
@@ -183,7 +186,7 @@ public class HoldingsItemsResolverService {
               instanceId,
               userName,
               notPermittedTenantsAsStr);
-      log.error(errorMessage);
+      log.warn("removeNotPermittedTenants:: jobExecutionId {} {}", jobExecutionId, errorMessage);
       notPermittedTenants.forEach(consortiaHoldingsIdsPerTenant::remove);
     }
   }

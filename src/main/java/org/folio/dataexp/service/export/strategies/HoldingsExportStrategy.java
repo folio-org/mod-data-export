@@ -144,7 +144,9 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
     try {
       rules = ruleFactory.getRules(mappingProfile);
     } catch (TransformationRuleException e) {
-      log.error(e);
+      log.error(
+          "getGeneratedMarc:: TransformationRuleException for jobExecutionId {}",
+          jobExecutionId, e);
       errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
       return result;
     }
@@ -239,7 +241,9 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
       if (holdingJsonOpt.isEmpty()) {
         var errorMessage =
             String.format(ERROR_CONVERTING_TO_JSON_HOLDING.getDescription(), holding.getId());
-        log.error("getHoldingsWithInstanceAndItems:: {}", errorMessage);
+        log.error(
+            "getHoldingsWithInstanceAndItems:: jobExecutionId {} {}",
+            generatedMarcResult.getJobExecutionId(), errorMessage);
         generatedMarcResult.addIdToFailed(holding.getId());
         errorLogService.saveGeneralError(errorMessage, generatedMarcResult.getJobExecutionId());
         continue;
@@ -251,8 +255,8 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
           var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
           if (instanceJsonOpt.isEmpty()) {
             log.error(
-                "getHoldingsWithInstanceAndItems:: Error converting to json instance by id {}",
-                instance.getId());
+                "getHoldingsWithInstanceAndItems:: jobExecutionId {} instance {} to json failed",
+                generatedMarcResult.getJobExecutionId(), instance.getId());
           } else {
             var instanceJson = instanceJsonOpt.get();
             holdingWithInstanceAndItems.appendField(INSTANCE_KEY, instanceJson);
@@ -270,13 +274,16 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
       holdingsWithInstanceAndItems.put(holding.getId(), holdingWithInstanceAndItems);
     }
     holdingsIds.removeAll(existHoldingsIds);
-    holdingsIds.forEach(
-        holdingsId -> {
-          log.error(
-              "getHoldingsWithInstanceAndItems:: holding by id {} does not exist", holdingsId);
-          generatedMarcResult.addIdToNotExist(holdingsId);
-          generatedMarcResult.addIdToFailed(holdingsId);
-        });
+    if (!holdingsIds.isEmpty()) {
+      log.warn(
+          "getHoldingsWithInstanceAndItems:: jobExecutionId {} {} holding(s) do not exist: {}",
+          generatedMarcResult.getJobExecutionId(), holdingsIds.size(), holdingsIds);
+      holdingsIds.forEach(
+          holdingsId -> {
+            generatedMarcResult.addIdToNotExist(holdingsId);
+            generatedMarcResult.addIdToFailed(holdingsId);
+          });
+    }
     return holdingsWithInstanceAndItems;
   }
 
@@ -311,24 +318,23 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
 
   private Map<String, Set<UUID>> getTenantIds(
       Set<UUID> ids, String centralTenantId, UUID jobExecutionId) {
-    log.info("getTenantIds ids: {}", ids);
+    log.debug("getTenantIds ids count: {}", ids.size());
     Map<String, Set<UUID>> idsMap = new HashMap<>();
     var availableTenants =
         consortiaService.getAffiliatedTenants(
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    log.info(
+    log.debug(
         "Affiliated tenants for user {} from {} tenant: {}",
         folioExecutionContext.getUserId(),
         folioExecutionContext.getTenantId(),
         availableTenants);
+    // Per-id details are persisted via errorLogService; the log only carries one line per category.
+    var noPermissionIds = new ArrayList<UUID>();
+    var noAffiliationIds = new ArrayList<UUID>();
+    var tenantNotFoundIds = new ArrayList<UUID>();
     ids.forEach(
         id -> {
           var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
-          log.debug(
-              "ID: {}, tenant: {}, actualTenant: {}",
-              id,
-              curTenant,
-              folioExecutionContext.getTenantId());
           if (nonNull(curTenant)) {
             if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
               if (permissionsValidator.checkInstanceViewPermissions(curTenant)) {
@@ -343,12 +349,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
                         curTenant);
                 errorLogService.saveGeneralErrorWithMessageValues(
                     ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
-                log.error(
-                    format(
-                        ERROR_HOLDINGS_NO_PERMISSION.getDescription(),
-                        id,
-                        folioExecutionContext.getUserId(),
-                        curTenant));
+                noPermissionIds.add(id);
               }
             } else {
               var msgValues =
@@ -360,21 +361,35 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
                       curTenant);
               errorLogService.saveGeneralErrorWithMessageValues(
                   ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getCode(), msgValues, jobExecutionId);
-              log.error(
-                  format(
-                      ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getDescription(),
-                      id,
-                      folioExecutionContext.getUserId(),
-                      curTenant));
+              noAffiliationIds.add(id);
             }
           } else {
             errorLogService.saveGeneralErrorWithMessageValues(
                 ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(),
                 List.of(id.toString()),
                 jobExecutionId);
-            log.error(format(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(), id));
+            tenantNotFoundIds.add(id);
           }
         });
+    if (!noPermissionIds.isEmpty()) {
+      log.warn(
+          "getTenantIds:: jobExecutionId {} user {} has no view permissions for {} holding(s): {}",
+          jobExecutionId,
+          folioExecutionContext.getUserId(),
+          noPermissionIds.size(),
+          noPermissionIds);
+    }
+    if (!noAffiliationIds.isEmpty()) {
+      log.warn(
+          "getTenantIds:: jobExecutionId {} user {} has no affiliation for {} holding(s): {}",
+          jobExecutionId, folioExecutionContext.getUserId(), noAffiliationIds.size(),
+          noAffiliationIds);
+    }
+    if (!tenantNotFoundIds.isEmpty()) {
+      log.warn(
+          "getTenantIds:: jobExecutionId {} tenant not found for {} holding(s): {}",
+          jobExecutionId, tenantNotFoundIds.size(), tenantNotFoundIds);
+    }
     return idsMap;
   }
 
@@ -451,7 +466,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
       GeneratedMarcResult result,
       List<Rule> rules) {
     var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
-    log.info("idsTenant: {}", idsTenant);
+    log.debug("idsTenant count: {}", idsTenant.size());
     for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
       var tenantId = idsTenant.get(uuidJson.getKey());
 
@@ -479,7 +494,9 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
         ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
         List.of(errorMessage),
         jobExecutionId);
-    log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
+    log.error(
+        "getGeneratedMarc:: jobExecutionId {} exception to convert in marc: {}",
+        jobExecutionId, errorMessage);
   }
 
   private String mapToMarc(
@@ -496,7 +513,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
           var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
           var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
           log.warn(
-              "mapToSrs:: exception: {} for holding {}",
+              "mapToMarc:: exception: {} for holding {}",
               translationException.getCause().getMessage(),
               holdingsJsonObject.getAsString(ID_KEY));
         }));
