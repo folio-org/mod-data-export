@@ -23,12 +23,12 @@ public class ConfigurationValidator {
         var value = Integer.parseInt(config.getValue());
         if (value < 1) {
           var errorMsg = String.format("Slice size value cannot be less than 1: %d", value);
-          log.error(errorMsg);
+          log.warn("validate:: {}", errorMsg);
           throw new SliceSizeValidationException(errorMsg);
         }
       } catch (NumberFormatException e) {
         var errorMsg = String.format("Slice size is not a number: %s", config.getValue());
-        log.error(errorMsg);
+        log.warn("validate:: {}", errorMsg);
         throw new SliceSizeValidationException(errorMsg);
       }
     }

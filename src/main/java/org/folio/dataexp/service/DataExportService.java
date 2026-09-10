@@ -94,7 +94,13 @@ public class DataExportService {
     } catch (DataExportRequestValidationException e) {
       updateJobExecutionForPostDataExport(
           jobExecution, JobExecution.StatusEnum.FAIL, exportRequest);
-      log.error(e.getMessage());
+      log.warn(
+          "postDataExport:: validation failed for fileDefinitionId {} jobProfileId {}"
+              + " jobExecutionId {}: {}",
+          exportRequest.getFileDefinitionId(),
+          exportRequest.getJobProfileId(),
+          jobExecution.getId(),
+          e.getMessage());
       return;
     }
     log.info(
@@ -114,11 +120,13 @@ public class DataExportService {
                   && Boolean.FALSE.equals(exportRequest.getQuick())) {
                 inputFileProcessor.readFile(
                     fileDefinition, commonExportFails, exportRequest.getIdType());
-                log.info("File has been read successfully.");
+                log.info("postDataExport:: jobExecutionId {} file read successfully",
+                    jobExecution.getId());
               }
               slicerProcessor.sliceInstancesIds(
                   fileDefinition, exportRequest, mappingProfileEntity.getFormat());
-              log.info("Instance IDs have been sliced successfully.");
+              log.info("postDataExport:: jobExecutionId {} instance IDs sliced successfully",
+                  jobExecution.getId());
 
               updateJobExecutionForPostDataExport(
                   jobExecution, JobExecution.StatusEnum.IN_PROGRESS, exportRequest);
@@ -206,8 +214,9 @@ public class DataExportService {
           jobExecutionProgress.setTotal((int) marcAuthorityRecordAllRepository.count());
         }
         log.info(
-            "Total for export-all {}: {}",
+            "Total for export-all {} jobExecutionId {}: {}",
             exportRequest.getIdType(),
+            jobExecutionId,
             jobExecutionProgress.getTotal());
       }
     } else if (Boolean.TRUE.equals(exportRequest.getQuick())) {

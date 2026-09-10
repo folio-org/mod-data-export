@@ -33,7 +33,7 @@ public class RelatedUsersController implements RelatedUsersApi {
    */
   @Override
   public ResponseEntity<RelatedUserCollection> getRelatedUsers() {
-    log.info("GET related users");
+    log.debug("GET related users");
     var relatedUsers =
         jobExecutionEntityCqlRepository.findAll().stream()
             .map(JobExecutionEntity::getJobExecution)
@@ -46,7 +46,7 @@ public class RelatedUsersController implements RelatedUsersApi {
                         .firstName(runBy.getFirstName())
                         .lastName(runBy.getLastName()))
             .collect(Collectors.toSet());
-    log.info("Related users size: {}", relatedUsers.size());
+    log.debug("Related users size: {}", relatedUsers.size());
     var relatedUserCollection =
         new RelatedUserCollection()
             .relatedUsers(new ArrayList<>(relatedUsers))

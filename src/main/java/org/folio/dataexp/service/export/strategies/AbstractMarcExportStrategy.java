@@ -64,7 +64,7 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
       var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
       return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
     } catch (ParseException e) {
-      log.error("getAsJsonObject:: Error converting string to json {}", e.getMessage());
+      log.debug("getAsJsonObject:: Error converting string to json: {}", e.getMessage());
     }
     return Optional.empty();
   }
@@ -132,13 +132,15 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
       List<MarcRecordEntity> marcRecords,
       LocalStorageWriter localStorageWriter) {
     marcRecords = new ArrayList<>(marcRecords);
-    log.info("marcRecords size: {}", marcRecords.size());
+    log.debug("marcRecords size: {}", marcRecords.size());
     Map<UUID, MarcFields> additionalFieldsPerId;
     try {
       additionalFieldsPerId =
           getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile, jobExecutionId);
     } catch (TransformationRuleException e) {
-      log.error(e);
+      log.error(
+          "createAndSaveMarcFromJsonRecord:: TransformationRuleException for jobExecutionId {}",
+          jobExecutionId, e);
       errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
       return;
     }
@@ -185,7 +187,7 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
       GeneratedMarcResult result,
       ExportStrategyStatistic exportStatistic,
       LocalStorageWriter localStorageWriter) {
-    log.info("Generated marc size: {}", result.getMarcRecords().size());
+    log.debug("Generated marc size: {}", result.getMarcRecords().size());
     result
         .getMarcRecords()
         .forEach(
@@ -218,7 +220,7 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
         var duplicatedIdentifiers = duplicatedIdentifiersOptional.get();
         var errorMessage =
             getDuplicatedSrsErrorMessage(externalId, marcRecords, duplicatedIdentifiers);
-        log.warn(errorMessage);
+        log.warn("saveDuplicateErrors:: jobExecutionId {} {}", jobExecutionId, errorMessage);
         var associatedJson = duplicatedIdentifiers.getAssociatedJsonObject();
         if (nonNull(associatedJson)) {
           errorLogService.saveWithAffectedRecord(
@@ -252,7 +254,9 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
         String.format(
             ERROR_CONVERTING_JSON_TO_MARC.getDescription(),
             marcRecordEntity.getExternalId().toString());
-    log.error("{} : {}", errorMessage, e.getMessage());
+    log.error(
+        "saveConvertJsonRecordToMarcRecordError:: jobExecutionId {} {}: {}",
+        jobExecutionId, errorMessage, e.getMessage());
     errorLogService.saveGeneralError(errorMessage, jobExecutionId);
   }
 
@@ -294,7 +298,7 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
             exportFilesEntity.getFromId(),
             exportFilesEntity.getToId(),
             PageRequest.of(0, exportIdsBatch));
-    log.info("Slice size: {}", slice.getSize());
+    log.debug("Slice size: {}", slice.getNumberOfElements());
     var exportIds =
         slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
     createAndSaveRecords(
