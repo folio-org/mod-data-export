@@ -38,6 +38,8 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
       "src/test/resources/upload_with_bom.csv";
   private static final String UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV =
       "src/test/resources/upload_duplicated.csv";
+  private static final String UPLOADED_FILE_PATH_FOR_INVALID_UUID_CSV =
+      "src/test/resources/upload_invalid_uuid.csv";
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload.cql";
 
   @Autowired private FolioS3Client s3Client;
@@ -141,6 +143,41 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
               ERROR_DUPLICATED_IDS.getCode(),
               List.of("019e8aea-212d-4d1d-957d-0abcdd0e9acd", "3"),
               jobExecution.getId());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void readCsvFileIfInvalidUuidTest() {
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+    fileDefinition.fileName("upload_invalid_uuid.csv");
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
+    fileDefinition.setJobExecutionId(UUID.randomUUID());
+
+    s3Client.createBucketIfNotExists();
+
+    var path =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
+    var resource = new FileSystemResource(UPLOADED_FILE_PATH_FOR_INVALID_UUID_CSV);
+
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var jobExecution = new JobExecution().id(fileDefinition.getJobExecutionId());
+      jobExecution.setProgress(new JobExecutionProgress());
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+      jobExecutionEntityRepository.save(jobExecutionEntity);
+      s3Client.write(path, resource.getInputStream());
+
+      var commonExportStatistic = new CommonExportStatistic();
+      inputFileProcessor.readFile(
+          fileDefinition, commonExportStatistic, ExportRequest.IdTypeEnum.INSTANCE);
+
+      // only the two well-formed uuids are persisted
+      assertEquals(2, exportIdEntityRepository.count());
+      // the two malformed lines are collected for the aggregate warn
+      assertEquals(2, commonExportStatistic.getInvalidUuidFormat().size());
+      assertEquals(List.of("not-a-uuid", "12345"), commonExportStatistic.getInvalidUuidFormat());
     }
   }
 

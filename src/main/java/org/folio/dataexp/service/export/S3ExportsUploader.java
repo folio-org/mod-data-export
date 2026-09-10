@@ -88,6 +88,9 @@ public class S3ExportsUploader {
       }
       return uploadedPath;
     } catch (IOException e) {
+      log.error(
+          "upload:: IOException uploading export file for jobExecutionId {}",
+          jobExecution.getId(), e);
       throw new S3ExportsUploadException(e.getMessage());
     }
   }
@@ -106,7 +109,7 @@ public class S3ExportsUploader {
     try (var inputStream = new ByteArrayInputStream(marcFileContentBytes)) {
       s3Client.write(s3path, inputStream);
     }
-    log.info("Marc record uploaded as " + s3FileName);
+    log.info("uploadSingleRecordById:: Marc record uploaded as {}", s3FileName);
   }
 
   /**
@@ -129,7 +132,7 @@ public class S3ExportsUploader {
       try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
         s3Client.write(s3path, inputStream, fileToUpload.length());
       }
-      log.info(fileToUpload.getPath() + " uploaded as " + s3Name);
+      log.info("uploadSingleFile:: {} uploaded as {}", fileToUpload.getPath(), s3Name);
       removeTempDirForJobExecution(jobExecution.getId());
     } else {
       removeTempDirForJobExecution(jobExecution.getId());
@@ -171,7 +174,7 @@ public class S3ExportsUploader {
                   jobExecution.getHrId(),
                   countExportsFiles,
                   fileSuffix);
-          log.info(exportFile.getPath() + " add to zip as " + zipEntryName);
+          log.debug("{} add to zip as {}", exportFile.getPath(), zipEntryName);
           ZipEntry zipEntry = new ZipEntry(zipEntryName);
           zipOutputStream.putNextEntry(zipEntry);
           byte[] bytes = new byte[1024];

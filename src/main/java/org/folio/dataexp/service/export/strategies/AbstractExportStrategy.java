@@ -76,7 +76,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           SAVE_ERROR,
           "saveOutputToLocalStorage",
           exportFilesEntity.getFileLocation(),
-          jobExecutionId);
+          jobExecutionId,
+          e);
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.removeExported();
       long countFailed =

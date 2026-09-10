@@ -34,7 +34,7 @@ public class PermissionsProvider {
     try (var ignored =
         new FolioExecutionContextSetter(
             prepareContextForTenant(tenantId, folioModuleMetadata, folioExecutionContext))) {
-      log.info("getUserPermissions:: user {} tenant {}", userId, tenantId);
+      log.debug("getUserPermissions:: user {} tenant {}", userId, tenantId);
 
       return userPermissionsService.getPermissions();
     }

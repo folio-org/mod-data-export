@@ -1,7 +1,6 @@
 package org.folio.dataexp.controllers;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.rest.resource.ExportApi;
 import org.folio.dataexp.service.DataExportService;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller for data export operations. */
 @RestController
 @RequiredArgsConstructor
-@Log4j2
 @RequestMapping("/data-export")
 public class DataExportController implements ExportApi {
 

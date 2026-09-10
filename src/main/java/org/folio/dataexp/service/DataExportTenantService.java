@@ -121,9 +121,9 @@ public class DataExportTenantService extends TenantService {
       mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
     } catch (Exception e) {
       log.error(
-          "Error loading mapping profile {} : {}",
+          "Error loading mapping profile {}",
           FilenameUtils.getBaseName(mappingProfilePath),
-          e.getMessage());
+          e);
     }
   }
 
@@ -143,9 +143,9 @@ public class DataExportTenantService extends TenantService {
       jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     } catch (Exception e) {
       log.error(
-          "Error loading job profile {} : {}",
+          "Error loading job profile {}",
           FilenameUtils.getBaseName(jobProfilePath),
-          e.getMessage());
+          e);
     }
   }
 

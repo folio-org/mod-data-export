@@ -209,7 +209,7 @@ public class ReferenceDataService {
    */
   public Map<String, JsonObjectWrapper> getLocations() {
     var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
-    log.info("getLocations list size: {}", list.size());
+    log.debug("getLocations list size: {}", list.size());
     return ObjectUtils.isEmpty(list)
         ? new HashMap<>()
         : list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));

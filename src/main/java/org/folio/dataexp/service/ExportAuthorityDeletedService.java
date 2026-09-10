@@ -54,7 +54,7 @@ public class ExportAuthorityDeletedService {
       return new ExportAuthorityDeletedResponse()
           .jobExecutionId(fileDefinition.getJobExecutionId());
     } catch (Exception e) {
-      log.error(e);
+      log.error("postExportDeletedAuthority:: failed to start export of deleted authorities", e);
       throw new AuthorityQueryException(e.getMessage());
     }
   }

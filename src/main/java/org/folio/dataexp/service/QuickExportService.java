@@ -91,7 +91,7 @@ public class QuickExportService {
           });
       exportIdEntityRepository.saveAll(batch);
     } else {
-      log.error(
+      log.warn(
           "Nothing to export for fileDefinitionId {}: no uuids provided.", fileDefinition.getId());
     }
   }

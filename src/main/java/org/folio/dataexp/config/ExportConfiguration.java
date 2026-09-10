@@ -44,7 +44,7 @@ public class ExportConfiguration {
               is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
-      log.error("Failed to fetch default rules for export");
+      log.error("Failed to fetch default rules for export", e);
       throw e;
     }
   }
@@ -64,7 +64,7 @@ public class ExportConfiguration {
               is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
-      log.error("Failed to fetch default holdings rules for export");
+      log.error("Failed to fetch default holdings rules for export", e);
       throw e;
     }
   }
