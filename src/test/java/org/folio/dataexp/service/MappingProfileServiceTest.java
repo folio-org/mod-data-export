@@ -1055,8 +1055,8 @@ class MappingProfileServiceTest {
   }
 
   @Test
+  @TestMate(name = "TestMate-bc1bc43be113a0ff08520bb8cad6b8f0")
   void getMappingProfilesWhenRepositoryReturnsEmptyPageShouldReturnEmptyCollection() {
-    // TestMate-bc1bc43be113a0ff08520bb8cad6b8f0
     // Given
     var query = "name==nonexistent";
     var offset = 0;
