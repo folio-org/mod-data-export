@@ -1,5 +1,12 @@
 ## v5.5.0 Unreleased
 
+## 09/25/2026 v5.4.6 Released
+
+This release contains logging improvements and optimization
+
+### Bugs
+[MDEXP-930](https://folio-org.atlassian.net/browse/MDEXP-930) Reduce log noise and duplication in mod-data-export
+
 ## 07/22/2026 v5.4.5 Released
 
 This release contains fix for error duplicates to apply error_logs_unique_idx index
