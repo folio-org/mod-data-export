@@ -18,8 +18,8 @@ import org.marc4j.marc.impl.SortedMarcFactoryImpl;
 import org.springframework.stereotype.Component;
 
 /** Converter for transforming JSON records to MARC records. */
-@Log4j2
 @Component
+@Log4j2
 public class JsonToMarcConverter {
 
   /** Converts a JSON record to a MARC record string. */
@@ -51,7 +51,7 @@ public class JsonToMarcConverter {
       writeMarc(marcJsonReader, marcStreamWriter, additionalFields, mappingProfile);
       return byteArrayOutputStream;
     } catch (IOException e) {
-      log.error(e.getMessage());
+      log.error("convertJsonRecordToMarcRecord:: IOException", e);
       throw e;
     }
   }
@@ -72,7 +72,7 @@ public class JsonToMarcConverter {
         marcStreamWriter.write(marc);
       }
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("writeMarc:: exception writing MARC record", e);
       throw new MarcException(e.getMessage());
     }
   }

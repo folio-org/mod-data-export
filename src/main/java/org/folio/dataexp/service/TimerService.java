@@ -71,7 +71,7 @@ public class TimerService {
       try {
         Integer.parseUnsignedInt(value);
       } catch (NumberFormatException e) {
-        log.error("Invalid value for clean-up files timer delay: {}", value);
+        log.warn("validateValueForTimer:: invalid clean-up files timer delay: {}", value);
         return EMPTY;
       }
     }

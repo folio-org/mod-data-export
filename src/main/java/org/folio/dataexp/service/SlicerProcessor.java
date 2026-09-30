@@ -63,19 +63,20 @@ public class SlicerProcessor {
     var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName(), outputFormat);
     var pathLocation =
         getPathToStoredFiles(fileDefinition.getJobExecutionId().toString(), fileName);
+    var procedure = selectProcedure(exportRequest);
     try (Connection connection = jdbcTemplate.getDataSource().getConnection();
-        CallableStatement callableStatement =
-            connection.prepareCall(selectProcedure(exportRequest))) {
+        CallableStatement callableStatement = connection.prepareCall(procedure)) {
       callableStatement.setString(1, fileDefinition.getJobExecutionId().toString());
       callableStatement.setString(2, pathLocation);
       callableStatement.setInt(3, sliceSize);
       callableStatement.executeUpdate();
     } catch (SQLException sqlException) {
       log.error(
-          "Exception for slice_instances_ids procedure call for"
-              + " fileDefinitionId {} with message {}",
+          "sliceFile:: jobExecutionId {} exception for {} procedure call for fileDefinitionId {}",
+          fileDefinition.getJobExecutionId(),
+          procedure,
           fileDefinition.getId(),
-          sqlException.getMessage());
+          sqlException);
       throw new DataExportException(sqlException.getMessage());
     }
   }

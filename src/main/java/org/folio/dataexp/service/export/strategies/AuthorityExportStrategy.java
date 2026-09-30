@@ -60,20 +60,20 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
       UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       List<MarcRecordEntity> marcAuthorities = new ArrayList<>(getMarcAuthorities(externalIds));
-      log.info("Total marc authorities: {}", marcAuthorities.size());
+      log.debug("Total marc authorities: {}", marcAuthorities.size());
       if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
-        log.info("Deleted job profile for authority is being used.");
+        log.debug("Deleted job profile for authority is being used.");
       }
       Set<String> alreadySavedErrors = new HashSet<>();
       handleDeleted(marcAuthorities, jobExecutionId, exportRequest, alreadySavedErrors);
       marcAuthorities =
           new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
-      log.info("Marc authorities after removing: {}", marcAuthorities.size());
+      log.debug("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
       var foundIds =
           marcAuthorities.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
-      log.info(
+      log.debug(
           "Number of authority records found from local tenant: {}, not found: {}",
           foundIds.size(),
           externalIds.size());
@@ -84,22 +84,22 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
           var authoritiesFromCentralTenant =
               marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(
                   centralTenantId, externalIds);
-          log.info(
+          log.debug(
               "Number of authority records found from central tenant: {}",
               authoritiesFromCentralTenant.size());
           handleDeleted(
               authoritiesFromCentralTenant, jobExecutionId, exportRequest, alreadySavedErrors);
           entityManager.clear();
           marcAuthorities.addAll(authoritiesFromCentralTenant);
-          log.info("Total number of authority records found: {}", marcAuthorities.size());
+          log.debug("Total number of authority records found: {}", marcAuthorities.size());
         } else {
-          log.error(
-              "Central tenant id not found: {}, authorities that cannot be found: {}",
-              centralTenantId,
-              externalIds);
+          log.warn(
+              "getMarcRecords:: jobExecutionId {} Central tenant id not found: {},"
+                  + " authorities not found count: {}",
+              jobExecutionId, centralTenantId, externalIds.size());
         }
       }
-      log.debug("Final authority records: {}", marcAuthorities);
+      log.debug("Final authority records count: {}", marcAuthorities.size());
       return marcAuthorities;
     }
     return new ArrayList<>();
@@ -173,7 +173,7 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
                 ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(), List.of(msg), jobExecutionId);
             alreadySavedErrors.add(msg);
           }
-          log.error(msg);
+          log.debug("handleDeleted:: jobExecutionId {} {}", jobExecutionId, msg);
           msg = ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getDescription();
           if (!errorsForNonDeletedProfile) {
             errorLogService.saveGeneralErrorWithMessageValues(
@@ -182,7 +182,7 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
                 jobExecutionId);
             errorsForNonDeletedProfile = true;
           }
-          log.error(msg);
+          log.debug("handleDeleted:: jobExecutionId {} {}", jobExecutionId, msg);
           iterator.remove();
         }
       } else if (rec.getState().equals("ACTUAL")
@@ -193,7 +193,7 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
               ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(), List.of(msg), jobExecutionId);
           errorsForDeletedProfile = true;
         }
-        log.error(msg);
+        log.debug("handleDeleted:: jobExecutionId {} {}", jobExecutionId, msg);
         iterator.remove();
       }
     }

@@ -84,9 +84,13 @@ public class ExportExecutor {
       exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
       log.info(
-          "export:: Complete export {} for job execution {}",
+          "export:: Complete export {} for job execution {}"
+              + " exported={} failed={} duplicatedSrs={}",
           exportFilesEntity.getFileLocation(),
-          exportFilesEntity.getJobExecutionId());
+          exportFilesEntity.getJobExecutionId(),
+          exportStatistic.getExported(),
+          exportStatistic.getFailed(),
+          exportStatistic.getDuplicatedSrs());
       updateJobExecutionStatusAndProgress(
           exportFilesEntity.getJobExecutionId(),
           exportStatistic,
@@ -143,14 +147,16 @@ public class ExportExecutor {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       } else {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
-        log.error(
-            "export size: {}, errorCount: {}, exportsCompleted: {}, "
-                + "exportsCompletedWithErrors: {}, jobExecution: {}",
+        log.warn(
+            "updateJobExecutionStatusAndProgress:: export size: {}, errorCount: {},"
+                + " exportsCompleted: {}, exportsCompletedWithErrors: {},"
+                + " jobExecutionId: {}, status: {}",
             exports.size(),
             errorCount,
             exportsCompleted,
             exportsCompletedWithErrors,
-            jobExecution);
+            jobExecution.getId(),
+            jobExecution.getStatus());
       }
       var filesForExport =
           exports.stream()
@@ -182,10 +188,9 @@ public class ExportExecutor {
             List.of(ErrorCode.NO_FILE_GENERATED.getDescription()),
             jobExecutionId);
         log.error(
-            "updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} "
-                + "with exception {}",
+            "updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {}",
             jobExecutionId,
-            e.getMessage());
+            e);
       }
       jobExecution.completedDate(currentDate);
       storageCleanUpService.cleanExportIdEntities(jobExecutionId);
@@ -193,7 +198,7 @@ public class ExportExecutor {
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionService.save(jobExecution);
     log.info(
-        "Job execution by id {} is updated with status {}",
+        "updateJobExecutionStatusAndProgress:: Job execution {} updated with status {}",
         jobExecutionId,
         jobExecution.getStatus());
   }

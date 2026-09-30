@@ -161,7 +161,7 @@ public class JobProfileService {
       deleteExportedFilesAndDisableLink(jobProfileId);
       jobProfileEntityRepository.deleteById(jobProfileId);
     } else {
-      log.error("Attempt to delete a locked job profile with ID: {}", jobProfileId);
+      log.warn("Attempt to delete a locked job profile with ID: {}", jobProfileId);
       throw new LockJobProfileException(
           "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
     }
@@ -222,7 +222,6 @@ public class JobProfileService {
    * @return job profile collection
    */
   private JobProfileCollection getUsedJobProfiles(Integer offset, Integer limit) {
-    log.info("getUsedJobProfiles::");
 
     List<Object[]> jobProfileData =
         jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
@@ -248,7 +247,6 @@ public class JobProfileService {
    * @return job profile collection
    */
   private JobProfileCollection getListOfJobProfiles(String query, Integer offset, Integer limit) {
-    log.info("getListOfJobProfiles::");
     if (StringUtils.isEmpty(query)) {
       query = "(cql.allRecords=1)";
     }

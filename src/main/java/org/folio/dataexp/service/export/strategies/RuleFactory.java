@@ -71,7 +71,7 @@ public class RuleFactory {
   public List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
     var rules = buildRules(mappingProfile);
     if (shouldSuppress999ff(mappingProfile)) {
-      log.info("Suppressing 999ff");
+      log.debug("Suppressing 999ff");
       rules =
           rules.stream()
               .filter(
@@ -83,7 +83,7 @@ public class RuleFactory {
           Arrays.stream(mappingProfile.getFieldsSuppression().split(COMMA))
               .map(StringUtils::trim)
               .toList();
-      log.info("Suppressing fields [{}]", String.join(COMMA, fieldsToSuppress));
+      log.debug("Suppressing fields [{}]", String.join(COMMA, fieldsToSuppress));
       return isEmpty(fieldsToSuppress)
           ? rules
           : rules.stream().filter(rule -> !(fieldsToSuppress.contains(rule.getField()))).toList();
@@ -108,12 +108,6 @@ public class RuleFactory {
       return create(mappingProfile);
     }
     List<Rule> rulesFromConfig = new ArrayList<>();
-    if (mappingProfile != null && isNotEmpty(rulesFromConfig)) {
-      log.info(
-          "Using overridden rules configuration with transformations from the mapping profile "
-              + "with id {}",
-          mappingProfile.getId());
-    }
     return CollectionUtils.isEmpty(rulesFromConfig)
         ? create(mappingProfile)
         : create(mappingProfile, rulesFromConfig, true);
@@ -134,7 +128,7 @@ public class RuleFactory {
       defaultRules.addAll(defaultHoldingsRulesFromConfigFile);
     }
     if (mappingProfile == null || CollectionUtils.isEmpty(mappingProfile.getTransformations())) {
-      log.info("No Mapping rules specified, using default mapping rules");
+      log.debug("No Mapping rules specified, using default mapping rules");
       return defaultRules;
     }
     List<Rule> rules =
@@ -163,10 +157,8 @@ public class RuleFactory {
           || isHoldingsTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
       } else if (RecordTypes.ITEM.equals(mappingTransformation.getRecordType())) {
-        log.error(
-            String.format(
-                "No transformation provided for field name: %s, and with record type: %s",
-                mappingTransformation.getFieldId(), mappingTransformation.getRecordType()));
+        log.warn("No transformation provided for field name: {}, and with record type: {}",
+            mappingTransformation.getFieldId(), mappingTransformation.getRecordType());
       }
       if (rule.isPresent()) {
         rules.add(rule.get());

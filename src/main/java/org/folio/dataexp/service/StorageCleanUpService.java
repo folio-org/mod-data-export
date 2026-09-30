@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.util.S3FilePathUtils;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 /** Service for cleaning up expired files and file definitions from storage. */
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class StorageCleanUpService {
   private static final int DEFAULT_EXPIRATION_PERIOD = 24;
 
@@ -34,8 +34,11 @@ public class StorageCleanUpService {
     var expirationDate =
         new Date(new Date().getTime() - HOURS.toMillis(getExpirationPeriod(cleanUpFilesDelay)));
     var expiredFileDefinitions = fileDefinitionEntityRepository.getExpiredEntities(expirationDate);
+    if (expiredFileDefinitions.isEmpty()) {
+      return;
+    }
     log.info(
-        "Removing files and file definitions, number of file definitions to clean up: {}",
+        "cleanExpiredFilesAndFileDefinitions:: cleaning up {} expired file definition(s)",
         expiredFileDefinitions.size());
     expiredFileDefinitions.forEach(
         fileDefinitionEntity -> {
@@ -68,7 +71,8 @@ public class StorageCleanUpService {
       try {
         return Integer.parseUnsignedInt(value);
       } catch (NumberFormatException e) {
-        log.info("Invalid value for file definition expiration: {}, using default 24 hours", value);
+        log.warn(
+            "getExpirationPeriod:: invalid value {}, using default 24 hours", value);
       }
     }
     return DEFAULT_EXPIRATION_PERIOD;

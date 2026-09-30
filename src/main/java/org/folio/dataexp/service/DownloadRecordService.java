@@ -15,6 +15,7 @@ import org.folio.dataexp.service.export.ExportStrategyFactory;
 import org.folio.dataexp.service.export.S3ExportsUploader;
 import org.folio.dataexp.service.export.strategies.JsonToMarcConverter;
 import org.folio.spring.FolioExecutionContext;
+import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.MarcStreamWriter;
@@ -102,9 +103,10 @@ public class DownloadRecordService {
       return jsonToMarcConverter
           .convertJsonRecordToMarcRecord(marcRecord.getContent(), List.of(), mappingProfile, isUtf)
           .toByteArray();
-    } catch (IOException e) {
+    } catch (IOException | MarcException e) {
       log.error(
-          "generateRecordFileContent :: Error generating content for record with ID: {}", recordId);
+          "generateRecordFileContentBytes:: Error generating content for record with ID: {}",
+          recordId, e);
       throw new DownloadRecordException(e.getMessage());
     }
   }
@@ -119,7 +121,7 @@ public class DownloadRecordService {
     try {
       s3Uploader.uploadSingleRecordById(dirName, marcFileContentBytes);
     } catch (IOException e) {
-      log.error("uploadMarcFile:: Error while upload marc file to remote storage {}", dirName);
+      log.error("uploadMarcFile:: Error while upload marc file to remote storage {}", dirName, e);
       throw new DownloadRecordException(e.getMessage());
     }
   }
@@ -147,7 +149,7 @@ public class DownloadRecordService {
       }
       return new ByteArrayInputStream(marcOutputStream.toByteArray());
     } catch (IOException e) {
-      log.error("Failed to remove tag {} from marc record: {}", "999ff", e.getMessage());
+      log.error("Failed to remove tag 999ff from marc record", e);
       return marcFileContent;
     }
   }

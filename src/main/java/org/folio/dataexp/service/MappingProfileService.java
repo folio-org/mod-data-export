@@ -59,14 +59,18 @@ public class MappingProfileService {
               0,
               Integer.MAX_VALUE);
       if (linkedJobProfiles.getTotalRecords() > 0) {
+        var linkedIds =
+            linkedJobProfiles.getJobProfiles().stream().map(JobProfile::getId).toList();
+        log.warn(
+            "delete:: mapping profile {} cannot be deleted, linked to job profiles: {}",
+            mappingProfileId,
+            linkedIds);
         throw new LockMappingProfileException(
-            "Cannot delete mapping profile linked to job profiles: %s."
-                .formatted(
-                    linkedJobProfiles.getJobProfiles().stream().map(JobProfile::getId).toList()));
+            "Cannot delete mapping profile linked to job profiles: %s.".formatted(linkedIds));
       }
       mappingProfileEntityRepository.deleteById(mappingProfileId);
     } else {
-      log.error("Attempt to delete locked mapping profile with id: {}", mappingProfileId);
+      log.warn("Attempt to delete locked mapping profile with id: {}", mappingProfileId);
       throw new LockMappingProfileException(
           "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
     }

@@ -48,12 +48,10 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
       ExportRequest exportRequest,
       LocalStorageWriter localStorageWriter) {
     var slice = chooseSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    log.info("Slice size for authorities export all: {}", slice.getContent().size());
     var exportIds =
         slice.getContent().stream()
             .map(MarcRecordEntity::getExternalId)
             .collect(Collectors.toSet());
-    log.info("Size of exportIds for authorities export all: {}", exportIds.size());
     createAndSaveMarc(
         exportIds,
         slice.getContent(),
