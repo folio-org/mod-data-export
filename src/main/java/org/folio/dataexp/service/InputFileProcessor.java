@@ -4,7 +4,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.folio.dataexp.util.ErrorCode.ERROR_DUPLICATED_IDS;
 import static org.folio.dataexp.util.ErrorCode.ERROR_INVALID_CQL_SYNTAX;
-import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredRecord;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,7 +32,6 @@ import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.dataexp.util.Constants;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,21 +79,6 @@ public class InputFileProcessor {
           fileDefinition.getJobExecutionId(), e);
       throw new DataExportException(e.getMessage());
     }
-  }
-
-  /**
-   * Reads a MARC file from storage.
-   *
-   * @param dirName The directory name.
-   * @return InputStream of the MARC file, or null if not found.
-   */
-  public InputStream readMarcFile(String dirName) {
-    var pathToRead =
-        getPathToStoredRecord(dirName, "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX));
-    if (s3Client.list(pathToRead).isEmpty()) {
-      return null;
-    }
-    return s3Client.read(pathToRead);
   }
 
   /**

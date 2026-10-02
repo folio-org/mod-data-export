@@ -38,8 +38,7 @@ class DownloadRecordControllerTest {
     var suppress999ff = false;
     var expectedResource =
         new InputStreamResource(new ByteArrayInputStream("marc content".getBytes()));
-    when(downloadRecordService.processRecordDownload(
-            recordId, isUtf, "-utf", idType, suppress999ff))
+    when(downloadRecordService.processRecordDownload(recordId, isUtf, idType, suppress999ff))
         .thenReturn(expectedResource);
     // When
     ResponseEntity<Resource> response =
@@ -51,7 +50,6 @@ class DownloadRecordControllerTest {
         .isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
     assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
         .isEqualTo("attachment; filename=\"550e8400-e29b-41d4-a716-446655440000-utf.mrc\"");
-    verify(downloadRecordService)
-        .processRecordDownload(recordId, isUtf, "-utf", idType, suppress999ff);
+    verify(downloadRecordService).processRecordDownload(recordId, isUtf, idType, suppress999ff);
   }
 }

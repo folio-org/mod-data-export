@@ -1,10 +1,8 @@
 package org.folio.dataexp.service.export;
 
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
-import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredRecord;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -93,23 +91,6 @@ public class S3ExportsUploader {
           jobExecution.getId(), e);
       throw new S3ExportsUploadException(e.getMessage());
     }
-  }
-
-  /**
-   * Uploads a single MARC record by ID to S3.
-   *
-   * @param dirName directory name
-   * @param marcFileContentBytes MARC file content bytes
-   * @throws IOException if upload fails
-   */
-  public void uploadSingleRecordById(String dirName, byte[] marcFileContentBytes)
-      throws IOException {
-    var s3FileName = "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX);
-    var s3path = getPathToStoredRecord(dirName, s3FileName);
-    try (var inputStream = new ByteArrayInputStream(marcFileContentBytes)) {
-      s3Client.write(s3path, inputStream);
-    }
-    log.info("uploadSingleRecordById:: Marc record uploaded as {}", s3FileName);
   }
 
   /**
