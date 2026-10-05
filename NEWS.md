@@ -1,5 +1,8 @@
 ## v5.5.0 Unreleased
 
+### Technical tasks
+[MDEXP-937](https://folio-org.atlassian.net/browse/MDEXP-937) Migrate to docker.io/alpine/minio:RELEASE.2025-10-15T17-29-55Z
+
 ## 07/22/2026 v5.4.5 Released
 
 This release contains fix for error duplicates to apply error_logs_unique_idx index
