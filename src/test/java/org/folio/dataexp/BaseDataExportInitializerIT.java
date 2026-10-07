@@ -107,7 +107,10 @@ public class BaseDataExportInitializerIT {
             Objects.toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
     postgresDBContainer.start();
     s3 =
-        new GenericContainer<>("minio/minio:latest")
+        new GenericContainer<>(
+                "cgr.dev/chainguard"
+                    + "/minio@sha256"
+                    + ":bd014394a80898e68c149f2311fdf8d5a2c2f3bb2c33b9327ae6d02b4b065ae1")
             .withEnv("MINIO_ACCESS_KEY", S3_ACCESS_KEY)
             .withEnv("MINIO_SECRET_KEY", S3_SECRET_KEY)
             .withCommand("server /data")
