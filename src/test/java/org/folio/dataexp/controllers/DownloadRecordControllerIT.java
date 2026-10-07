@@ -36,7 +36,7 @@ class DownloadRecordControllerIT extends BaseDataExportInitializerIT {
     var mockData = "some data".getBytes();
     var mockResource = new InputStreamResource(new ByteArrayInputStream(mockData));
     when(downloadRecordService.processRecordDownload(
-            authorityId, isUtf == null || isUtf, formatPostfix, IdType.AUTHORITY, false))
+            authorityId, isUtf == null || isUtf, IdType.AUTHORITY, false))
         .thenReturn(mockResource);
 
     mockMvc
@@ -55,8 +55,7 @@ class DownloadRecordControllerIT extends BaseDataExportInitializerIT {
         .andExpect(content().bytes(mockData));
 
     verify(downloadRecordService)
-        .processRecordDownload(
-            authorityId, isUtf == null || isUtf, formatPostfix, IdType.AUTHORITY, false);
+        .processRecordDownload(authorityId, isUtf == null || isUtf, IdType.AUTHORITY, false);
   }
 
   private static Stream<Arguments> providedData() {

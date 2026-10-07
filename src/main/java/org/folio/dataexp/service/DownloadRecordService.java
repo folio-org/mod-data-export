@@ -12,7 +12,6 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.IdType;
 import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.service.export.ExportStrategyFactory;
-import org.folio.dataexp.service.export.S3ExportsUploader;
 import org.folio.dataexp.service.export.strategies.JsonToMarcConverter;
 import org.folio.spring.FolioExecutionContext;
 import org.marc4j.MarcException;
@@ -32,58 +31,32 @@ public class DownloadRecordService {
 
   private final ExportStrategyFactory exportStrategyFactory;
   private final JsonToMarcConverter jsonToMarcConverter;
-  private final S3ExportsUploader s3Uploader;
-  private final InputFileProcessor inputFileProcessor;
   protected final FolioExecutionContext folioExecutionContext;
 
   /**
-   * Processes the download of a record by its ID.
+   * Processes the download of a record by its ID. The MARC file is generated from the current
+   * record on every request so that updates to the record are always reflected.
    *
    * @param recordId The record UUID.
    * @param isUtf Whether to use UTF encoding.
-   * @param formatPostfix Format postfix for the file.
    * @param idType The type of ID.
+   * @param suppress999ff Whether to remove the 999 ff field.
    * @return InputStreamResource containing the record data.
    */
   public InputStreamResource processRecordDownload(
-      final UUID recordId,
-      boolean isUtf,
-      final String formatPostfix,
-      final IdType idType,
-      boolean suppress999ff) {
+      final UUID recordId, boolean isUtf, final IdType idType, boolean suppress999ff) {
     log.info(
         "processRecordDownload:: start downloading record with id: {}, "
             + "isUtf: {}, suppress999ff: {}",
         recordId,
         isUtf,
         suppress999ff);
-    var dirName = recordId.toString() + formatPostfix;
-    InputStream marcFileContent = getContentIfFileExists(dirName);
-    if (marcFileContent == null) {
-      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf, idType);
-      uploadMarcFile(dirName, marcFileContentBytes);
-      if (suppress999ff) {
-        var inputStreamWithRemoved999ff =
-            remove999ffField(isUtf, new ByteArrayInputStream(marcFileContentBytes));
-        return new InputStreamResource(inputStreamWithRemoved999ff);
-      }
-      return new InputStreamResource(new ByteArrayInputStream(marcFileContentBytes));
-    } else {
-      if (suppress999ff) {
-        marcFileContent = remove999ffField(isUtf, marcFileContent);
-      }
-      return new InputStreamResource(marcFileContent);
+    InputStream marcFileContent =
+        new ByteArrayInputStream(generateRecordFileContentBytes(recordId, isUtf, idType));
+    if (suppress999ff) {
+      marcFileContent = remove999ffField(isUtf, marcFileContent);
     }
-  }
-
-  /**
-   * Gets the content of a MARC file if it exists.
-   *
-   * @param dirName Directory name.
-   * @return InputStream of the file, or null if not found.
-   */
-  private InputStream getContentIfFileExists(final String dirName) {
-    return inputFileProcessor.readMarcFile(dirName);
+    return new InputStreamResource(marcFileContent);
   }
 
   /**
@@ -107,21 +80,6 @@ public class DownloadRecordService {
       log.error(
           "generateRecordFileContentBytes:: Error generating content for record with ID: {}",
           recordId, e);
-      throw new DownloadRecordException(e.getMessage());
-    }
-  }
-
-  /**
-   * Uploads the MARC file to remote storage.
-   *
-   * @param dirName Directory name.
-   * @param marcFileContentBytes Byte array of MARC file content.
-   */
-  private void uploadMarcFile(final String dirName, byte[] marcFileContentBytes) {
-    try {
-      s3Uploader.uploadSingleRecordById(dirName, marcFileContentBytes);
-    } catch (IOException e) {
-      log.error("uploadMarcFile:: Error while upload marc file to remote storage {}", dirName, e);
       throw new DownloadRecordException(e.getMessage());
     }
   }

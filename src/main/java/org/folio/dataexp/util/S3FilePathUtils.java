@@ -17,9 +17,6 @@ public class S3FilePathUtils {
   /** Template for uploaded file path. */
   private static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
 
-  /** Template for record location path. */
-  public static final String RECORD_LOCATION_PATH = "mod-data-export/download/%s/%s";
-
   /** Private constructor to prevent instantiation. */
   private S3FilePathUtils() {}
 
@@ -94,17 +91,6 @@ public class S3FilePathUtils {
       return exportTmpStorage + "/" + location;
     }
     return location;
-  }
-
-  /**
-   * Returns the path to a stored record for a given directory name and file name.
-   *
-   * @param dirName the directory name
-   * @param fileName the file name
-   * @return the full path to the stored record
-   */
-  public static String getPathToStoredRecord(String dirName, String fileName) {
-    return String.format(RECORD_LOCATION_PATH, dirName, fileName);
   }
 
   /**
