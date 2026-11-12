@@ -1,5 +1,12 @@
 ## v5.5.0 Unreleased
 
+## 11/12/2026 v5.4.7 Released
+### Technical tasks
+* [MDEXP-934](https://folio-org.atlassian.net/browse/MDEXP-934) Upgrade module to Spring Boot 4.1.1
+* [MDEXP-929](https://folio-org.atlassian.net/browse/MDEXP-929) Add DeployConfig.json file
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.4.6...v5.4.7)
+
 ## 09/25/2026 v5.4.6 Released
 
 This release contains logging improvements and optimization
