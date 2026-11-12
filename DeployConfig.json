@@ -162,7 +162,6 @@
         "type": "S3",
         "essential": true
       },
-
       {
         "name": "OKAPI_URL",
         "value": null,
@@ -249,7 +248,6 @@
       }
     ]
   },
-
   "sidecarDefaults": {
     "resources": [
       {
