@@ -9,29 +9,29 @@
       },
       {
         "name": "memory",
-        "value": "2592",
+        "value": "2048",
         "description": "Memory hard limit for container"
       },
       {
         "name": "memoryReservation",
-        "value": "2480",
+        "value": "1844",
         "description": "Memory reservation for container"
       }
     ],
     "java": [
       {
         "name": "xmx",
-        "value": "1440m",
+        "value": "1292m",
         "description": "Maximum Java heap size"
       },
       {
         "name": "MaxMetaspaceSize",
-        "value": "1024m",
+        "value": "256m",
         "description": "Maximum Java metaspace size"
       },
       {
         "name": "MetaspaceSize",
-        "value": "88m",
+        "value": "192m",
         "description": "Initial Java metaspace size"
       }
     ],
@@ -72,7 +72,7 @@
       },
       {
         "name": "DB_MAXPOOLSIZE",
-        "value": "20",
+        "value": "10",
         "description": "Maximum database connection pool size",
         "type": "DB",
         "essential": false
@@ -192,7 +192,7 @@
       },
       {
         "name": "EXPORT_FILES_MAX_POOL_SIZE",
-        "value": "10",
+        "value": "5",
         "description": "Maximum pool size for threads processing export files",
         "type": "FUNCTIONAL",
         "essential": false
