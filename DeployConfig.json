@@ -1,0 +1,324 @@
+{
+  "description": "mod-data-export configuration template",
+  "moduleDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for container"
+      },
+      {
+        "name": "memory",
+        "value": "2048",
+        "description": "Memory hard limit for container"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "1844",
+        "description": "Memory reservation for container"
+      }
+    ],
+    "java": [
+      {
+        "name": "xmx",
+        "value": "1292m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "256m",
+        "description": "Maximum Java metaspace size"
+      },
+      {
+        "name": "MetaspaceSize",
+        "value": "192m",
+        "description": "Initial Java metaspace size"
+      }
+    ],
+    "deployment": {
+      "isHaSupported": true,
+      "replicasRecommendedCount": 2,
+      "description": "Deployment configuration for the backend module. Adjust replicas based on expected load and HA requirements. Set to false if only single instance is supported or required."
+    },
+    "kong": {
+      "timeouts": {
+        "connect": "60s",
+        "send": "60s",
+        "read": "60s"
+      },
+      "description": "Custom Kong proxy timeouts. Use this only if different from default Kong configuration"
+    },
+    "EnvVars": [
+      {
+        "name": "DB_DATABASE",
+        "value": null,
+        "description": "Database name",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_EXPLAIN_QUERY_THRESHOLD",
+        "value": "300000",
+        "description": "Threshold for explaining slow queries in milliseconds",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_HOST",
+        "value": null,
+        "description": "Database host",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_MAXPOOLSIZE",
+        "value": "10",
+        "description": "Maximum database connection pool size",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": null,
+        "description": "Database password",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PORT",
+        "value": null,
+        "description": "Database port",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": null,
+        "description": "Database username",
+        "type": "DB",
+        "essential": true
+      },
+
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Environment",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Java options",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "S3_ACCESS_KEY_ID",
+        "value": null,
+        "description": "S3 access key",
+        "type": "S3",
+        "essential": true
+      },
+      {
+        "name": "S3_BUCKET",
+        "value": null,
+        "description": "S3 bucket",
+        "type": "S3",
+        "essential": true
+      },
+      {
+        "name": "S3_IS_AWS",
+        "value": true,
+        "description": "Specify if AWS S3 is used as files storage",
+        "type": "S3",
+        "essential": true
+      },
+      {
+        "name": "S3_REGION",
+        "value": null,
+        "description": "S3 region",
+        "type": "S3",
+        "essential": true
+      },
+      {
+        "name": "S3_SECRET_ACCESS_KEY",
+        "value": null,
+        "description": "S3 secret key",
+        "type": "S3",
+        "essential": true
+      },
+      {
+        "name": "S3_SUB_PATH",
+        "value": "mod-data-export",
+        "description": "S3 subpath for file storage",
+        "type": "S3",
+        "essential": false
+      },
+      {
+        "name": "S3_URL",
+        "value": null,
+        "description": "S3 url",
+        "type": "S3",
+        "essential": true
+      },
+      {
+        "name": "OKAPI_URL",
+        "value": null,
+        "description": "Okapi url",
+        "type": "FUNCTIONAL",
+        "essential": true
+      },
+      {
+        "name": "PLATFORM",
+        "value": "eureka",
+        "description": "Specifies if okapi or eureka platform",
+        "type": "FUNCTIONAL",
+        "essential": true
+      },
+      {
+        "name": "WAIT_SEARCH_IDS_TIME",
+        "value": "10800",
+        "description": "Maximum time in seconds to wait for search (mod-search) to return identifiers",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "EXPORT_IDS_BATCH",
+        "value": "1000",
+        "description": "Number of record identifiers processed in a single export batch",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "EXPORT_FILES_MAX_POOL_SIZE",
+        "value": "5",
+        "description": "Maximum pool size for threads processing export files",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "PROCESS_SLICES_THREAD_POOL_SIZE",
+        "value": "10",
+        "description": "Thread pool size for processing slices of export data",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "EXPORT_TMP_STORAGE",
+        "value": null,
+        "description": "Local directory for temporary export files. If empty, the system temporary directory is used",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "CLEAN_UP_FILES_DELAY",
+        "value": null,
+        "description": "Delay for the periodic clean-up of old export files from storage. If empty, the default delay is used",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "MAX_UPLOADING_RETRIES",
+        "value": "5000",
+        "description": "Maximum number of retries when uploading a file to S3 storage",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "FEIGN_QUERY_CLIENT_RETRY_INITIAL_WAIT_TIME",
+        "value": "5000",
+        "description": "Initial wait time in milliseconds before retrying a query client request",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "FEIGN_QUERY_CLIENT_RETRY_MAX_WAIT_TIME",
+        "value": "30000",
+        "description": "Maximum wait time in milliseconds between query client retries",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "FEIGN_QUERY_CLIENT_RETRY_MAX_ATTEMPTS",
+        "value": "7",
+        "description": "Maximum number of attempts for a query client request",
+        "type": "FUNCTIONAL",
+        "essential": false
+      }
+    ]
+  },
+  "sidecarDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for container"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "512",
+        "description": "Memory reservation for container"
+      }
+    ],
+    "java": [
+      {
+        "name": "xms",
+        "value": "128m",
+        "description": "Initial Java heap size"
+      },
+      {
+        "name": "xmx",
+        "value": "256m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "96m",
+        "description": "Maximum Java metaspace size"
+      }
+    ],
+    "EnvVars": [
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Environment",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Additional JVM options for the sidecar process",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "MODULE_NAME",
+        "value": "mod-data-export",
+        "description": "Name of the backend module the sidecar fronts",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_URL",
+        "value": null,
+        "description": "Internal URL (host:port) at which the mod-data-export backend container is reachable from its sidecar",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_VERSION",
+        "value": null,
+        "description": "Version of the mod-data-export module deployed alongside this sidecar",
+        "type": "CONFIG",
+        "essential": true
+      }
+    ]
+  }
+}
