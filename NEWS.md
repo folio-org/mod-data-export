@@ -1,5 +1,14 @@
 ## v5.4.0 Unreleased
 
+## 11/17/2026 v5.3.1 Released
+
+This release contains story to download shared instances on ECS.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.3.0...v5.3.1)
+
+### Technical tasks
+* [MDEXP-935](https://folio-org.atlassian.net/browse/MDEXP-935) Implement retries for failed requests
+
 ## 01/20/2026 v5.3.0 Released
 
 This release contains story to download shared instances on ECS.
