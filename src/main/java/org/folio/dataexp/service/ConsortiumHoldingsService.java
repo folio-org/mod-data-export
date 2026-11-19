@@ -15,7 +15,7 @@ public class ConsortiumHoldingsService {
   private final ConsortiumSearchClient consortiumSearchClient;
 
 
-  /** Get holdings record by id */
+  /** Get holdings record by id. */
   @Retryable(
       maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
       backoff = @Backoff(
