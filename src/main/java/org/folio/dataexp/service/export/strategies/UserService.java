@@ -1,7 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.AllArgsConstructor;
-import org.folio.dataexp.client.UserClient;
+import org.folio.dataexp.service.RetryableUserClient;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class UserService {
-  private final UserClient userClient;
+  private final RetryableUserClient userClient;
 
   /** Gets the username for the given tenant and user ID. */
   @Cacheable(value = "userNameCache")

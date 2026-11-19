@@ -37,7 +37,6 @@ import java.util.stream.IntStream;
 import lombok.SneakyThrows;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.SearchClient;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -94,7 +93,7 @@ class DefaultJobProfileIdTest {
 
   @Mock private InputFileProcessor inputFileProcessor;
   @Mock private JobProfileEntityRepository jobProfileEntityRepository;
-  @Mock private UserClient userClient;
+  @Mock private RetryableUserClient userClient;
   @Mock private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @InjectMocks private DataExportService dataExportService;
   @Mock private SingleFileProcessorAsync singleFileProcessorAsync;
@@ -530,8 +529,6 @@ class DefaultJobProfileIdTest {
   @TestMate(name = "TestMate-7bec775a1cb3c9e884a6d907f10dbdec")
   @SneakyThrows
   void testReadFileWhenCqlSearchJobFailsShouldLogError() {
-    // Given
-    var cqlQuery = "cql.allRecords=1";
 
     // Use the real InputFileProcessor to execute the actual logic of readCqlFile
     var realInputFileProcessor =
@@ -543,11 +540,12 @@ class DefaultJobProfileIdTest {
             jobExecutionService,
             insertExportIdService);
 
-    // Set the wait time to a value strictly greater than SEARCH_POLL_INTERVAL_SECONDS (5L)
-    // Awaitility requires timeout > poll interval to avoid IllegalArgumentException
     Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
     waitField.setAccessible(true);
     waitField.set(realInputFileProcessor, 10);
+
+    // Given
+    var cqlQuery = "cql.allRecords=1";
 
     // Mocking dependencies
     when(s3Client.read(anyString()))

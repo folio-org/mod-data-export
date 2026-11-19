@@ -30,17 +30,6 @@ public class QueryService {
    * @param fields entity fields to retrieve
    * @return list of entities as field-value maps
    */
-  public List<Map<String, Object>> getEntities(
-      Set<UUID> ids, UUID entityTypeId, List<String> fields) {
-    var request = toRequest(ids, entityTypeId, fields);
-    return runQuery(request);
-  }
-
-  private ContentsRequest toRequest(Set<UUID> ids, UUID entityTypeId, List<String> fields) {
-    var requestIds = ids.stream().map(id -> Collections.singletonList(id.toString())).toList();
-    return new ContentsRequest().ids(requestIds).entityTypeId(entityTypeId).fields(fields);
-  }
-
   @Retryable(
       maxAttemptsExpression = "${application.feign-query-client-retry.max-attempts}",
       backoff = @Backoff(
@@ -49,7 +38,10 @@ public class QueryService {
           multiplier = 2.0
       )
   )
-  private List<Map<String, Object>> runQuery(ContentsRequest contents) {
-    return queryClient.getContents(contents);
+  public List<Map<String, Object>> getEntities(
+      Set<UUID> ids, UUID entityTypeId, List<String> fields) {
+    var requestIds = ids.stream().map(id -> Collections.singletonList(id.toString())).toList();
+    var request = new ContentsRequest().ids(requestIds).entityTypeId(entityTypeId).fields(fields);
+    return queryClient.getContents(request);
   }
 }
