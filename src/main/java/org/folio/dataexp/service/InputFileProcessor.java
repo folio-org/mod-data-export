@@ -44,10 +44,12 @@ import org.springframework.stereotype.Component;
 public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
-  private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
 
   @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
   private int waitSearchIdsTimeSeconds;
+
+  @Value("${application.search-poll-interval-seconds:5}")
+  private long searchPollIntervalSeconds;
 
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final FolioS3Client s3Client;
@@ -220,7 +222,7 @@ public class InputFileProcessor {
         var idsJob = searchClient.submitIdsJob(idsJobPayload);
         await()
             .with()
-            .pollInterval(SEARCH_POLL_INTERVAL_SECONDS, SECONDS)
+            .pollInterval(searchPollIntervalSeconds, SECONDS)
             .atMost(waitSearchIdsTimeSeconds, SECONDS)
             .until(
                 () -> getJobSearchStatus(idsJob.getId().toString()) != IdsJob.Status.IN_PROGRESS);

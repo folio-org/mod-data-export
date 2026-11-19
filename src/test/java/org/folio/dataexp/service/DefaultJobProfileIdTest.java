@@ -37,7 +37,6 @@ import java.util.stream.IntStream;
 import lombok.SneakyThrows;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.SearchClient;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -94,7 +93,7 @@ class DefaultJobProfileIdTest {
 
   @Mock private InputFileProcessor inputFileProcessor;
   @Mock private JobProfileEntityRepository jobProfileEntityRepository;
-  @Mock private UserClient userClient;
+  @Mock private RetryableUserClient userClient;
   @Mock private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @InjectMocks private DataExportService dataExportService;
   @Mock private SingleFileProcessorAsync singleFileProcessorAsync;
@@ -473,7 +472,11 @@ class DefaultJobProfileIdTest {
 
     Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
     waitField.setAccessible(true);
-    waitField.set(inputFileProcessor, 20);
+    waitField.set(inputFileProcessor, 5);
+    Field pollIntervalField =
+        InputFileProcessor.class.getDeclaredField("searchPollIntervalSeconds");
+    pollIntervalField.setAccessible(true);
+    pollIntervalField.set(inputFileProcessor, 1L);
 
     var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -543,11 +546,13 @@ class DefaultJobProfileIdTest {
             jobExecutionService,
             insertExportIdService);
 
-    // Set the wait time to a value strictly greater than SEARCH_POLL_INTERVAL_SECONDS (5L)
-    // Awaitility requires timeout > poll interval to avoid IllegalArgumentException
     Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
     waitField.setAccessible(true);
-    waitField.set(realInputFileProcessor, 10);
+    waitField.set(realInputFileProcessor, 5);
+    Field pollIntervalField =
+        InputFileProcessor.class.getDeclaredField("searchPollIntervalSeconds");
+    pollIntervalField.setAccessible(true);
+    pollIntervalField.set(realInputFileProcessor, 1L);
 
     // Mocking dependencies
     when(s3Client.read(anyString()))

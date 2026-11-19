@@ -15,6 +15,8 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /** Service for exporting deleted authority records. */
@@ -34,6 +36,14 @@ public class ExportAuthorityDeletedService {
    * @param request The export request.
    * @return Response containing job execution ID.
    */
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   public ExportAuthorityDeletedResponse postExportDeletedAuthority(
       ExportAuthorityDeletedRequest request) {
     log.info("POST export deleted authorities");

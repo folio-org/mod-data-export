@@ -11,7 +11,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dataexp.client.UserClient;
+import org.folio.dataexp.service.RetryableUserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.JobProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
@@ -37,7 +37,7 @@ public class JobProfileService {
 
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final FolioS3Client s3Client;
-  private final UserClient userClient;
+  private final RetryableUserClient userClient;
   private final JobExecutionService jobExecutionService;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
