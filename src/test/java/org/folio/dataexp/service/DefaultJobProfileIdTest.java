@@ -472,11 +472,7 @@ class DefaultJobProfileIdTest {
 
     Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
     waitField.setAccessible(true);
-    waitField.set(inputFileProcessor, 5);
-    Field pollIntervalField =
-        InputFileProcessor.class.getDeclaredField("searchPollIntervalSeconds");
-    pollIntervalField.setAccessible(true);
-    pollIntervalField.set(inputFileProcessor, 1L);
+    waitField.set(inputFileProcessor, 20);
 
     var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -546,11 +542,7 @@ class DefaultJobProfileIdTest {
 
     Field waitField = InputFileProcessor.class.getDeclaredField("waitSearchIdsTimeSeconds");
     waitField.setAccessible(true);
-    waitField.set(realInputFileProcessor, 5);
-    Field pollIntervalField =
-        InputFileProcessor.class.getDeclaredField("searchPollIntervalSeconds");
-    pollIntervalField.setAccessible(true);
-    pollIntervalField.set(realInputFileProcessor, 1L);
+    waitField.set(realInputFileProcessor, 10);
 
     // Given
     var cqlQuery = "cql.allRecords=1";
