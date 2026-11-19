@@ -233,6 +233,13 @@
         "essential": false
       },
       {
+        "name": "FEIGN_QUERY_CLIENT_RETRY_MAX_WAIT_TIME",
+        "value": "30000",
+        "description": "Maximum wait time in milliseconds between query client retries",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
         "name": "FEIGN_CLIENT_RETRY_INITIAL_WAIT_TIME",
         "value": "2000",
         "description": "Initial feign client retry wait time",
