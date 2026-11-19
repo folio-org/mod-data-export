@@ -533,8 +533,6 @@ class DefaultJobProfileIdTest {
   @TestMate(name = "TestMate-7bec775a1cb3c9e884a6d907f10dbdec")
   @SneakyThrows
   void testReadFileWhenCqlSearchJobFailsShouldLogError() {
-    // Given
-    var cqlQuery = "cql.allRecords=1";
 
     // Use the real InputFileProcessor to execute the actual logic of readCqlFile
     var realInputFileProcessor =
@@ -553,6 +551,9 @@ class DefaultJobProfileIdTest {
         InputFileProcessor.class.getDeclaredField("searchPollIntervalSeconds");
     pollIntervalField.setAccessible(true);
     pollIntervalField.set(realInputFileProcessor, 1L);
+
+    // Given
+    var cqlQuery = "cql.allRecords=1";
 
     // Mocking dependencies
     when(s3Client.read(anyString()))

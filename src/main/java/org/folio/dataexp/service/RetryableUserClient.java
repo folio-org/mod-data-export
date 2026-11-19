@@ -14,6 +14,7 @@ public class RetryableUserClient {
 
   private final UserClient userClient;
 
+  /** Get user by id. */
   @Retryable(
       maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
       backoff = @Backoff(
