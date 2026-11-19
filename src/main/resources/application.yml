@@ -76,6 +76,10 @@ application:
     initial-wait-time: ${FEIGN_QUERY_CLIENT_RETRY_INITIAL_WAIT_TIME:5000}
     max-wait-time: ${FEIGN_QUERY_CLIENT_RETRY_MAX_WAIT_TIME:30000}
     max-attempts: ${FEIGN_QUERY_CLIENT_RETRY_MAX_ATTEMPTS:7}
+  feign-client-retry:
+    initial-wait-time: ${FEIGN_CLIENT_RETRY_INITIAL_WAIT_TIME:2000}
+    max-wait-time: ${FEIGN_CLIENT_RETRY_MAX_WAIT_TIME:10000}
+    max-attempts: ${FEIGN_CLIENT_RETRY_MAX_ATTEMPTS:3}
   remote-files-storage:
     endpoint: ${S3_URL:http://localhost:9000/}
     region: ${S3_REGION:}

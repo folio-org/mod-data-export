@@ -10,6 +10,8 @@ import org.folio.dataexp.client.ConsortiumClient;
 import org.folio.dataexp.domain.dto.UserTenant;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /** Service for working with consortia and tenant relationships. */
@@ -28,6 +30,14 @@ public class ConsortiaService {
    * @param currentTenantId The current tenant ID.
    * @return Central tenant ID or empty string if not found.
    */
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   @Cacheable(value = "centralTenantCache")
   public String getCentralTenantId(String currentTenantId) {
     var userTenantCollection = consortiaClient.getUserTenantCollection();
@@ -49,6 +59,14 @@ public class ConsortiaService {
    * @param userId The user ID.
    * @return List of affiliated tenant IDs.
    */
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   @Cacheable(value = "affiliatedTenantsCache")
   public List<String> getAffiliatedTenants(String currentTenantId, String userId) {
     var consortia = consortiumClient.getConsortia();

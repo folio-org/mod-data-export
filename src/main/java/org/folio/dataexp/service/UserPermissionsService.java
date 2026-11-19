@@ -13,6 +13,8 @@ import org.folio.dataexp.client.EurekaUserPermissionsClient;
 import org.folio.dataexp.client.OkapiUserPermissionsClient;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /** Service for retrieving user permissions from different platforms. */
@@ -37,6 +39,14 @@ public class UserPermissionsService {
    *
    * @return list of permission names
    */
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   public List<String> getPermissions() {
     if (StringUtils.equals(EUREKA_PLATFORM, platform)) {
       var desiredPermissions = getDesiredPermissions();

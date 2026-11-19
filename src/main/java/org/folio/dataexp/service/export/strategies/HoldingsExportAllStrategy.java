@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
@@ -20,6 +19,7 @@ import org.folio.dataexp.repository.MarcHoldingsAllRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.ConsortiumHoldingsService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
@@ -48,7 +48,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
    * @param ruleHandler Handler for rule processing.
    * @param referenceDataProvider Provider for reference data.
    * @param consortiaService Service for consortia operations.
-   * @param consortiumSearchClient Client for consortium search.
+   * @param consortiumHoldingsService Service for consortium holdings lookups.
    * @param holdingsRecordEntityTenantRepository Repository for tenant-specific holdings records.
    * @param marcInstanceRecordRepository Repository for MARC instance records.
    * @param instanceCentralTenantRepository Repository for central tenant instances.
@@ -67,7 +67,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       RuleHandler ruleHandler,
       ReferenceDataProvider referenceDataProvider,
       ConsortiaService consortiaService,
-      ConsortiumSearchClient consortiumSearchClient,
+      ConsortiumHoldingsService consortiumHoldingsService,
       HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository,
       MarcInstanceRecordRepository marcInstanceRecordRepository,
       InstanceCentralTenantRepository instanceCentralTenantRepository,
@@ -85,7 +85,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
         ruleHandler,
         referenceDataProvider,
         consortiaService,
-        consortiumSearchClient,
+        consortiumHoldingsService,
         holdingsRecordEntityTenantRepository,
         marcInstanceRecordRepository,
         instanceCentralTenantRepository,

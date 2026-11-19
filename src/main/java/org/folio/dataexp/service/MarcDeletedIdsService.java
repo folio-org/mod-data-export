@@ -25,6 +25,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /** Service for retrieving deleted MARC record IDs and creating file definitions. */
@@ -52,6 +54,14 @@ public class MarcDeletedIdsService {
    * @param to End date.
    * @return The FileDefinition containing deleted MARC IDs.
    */
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   public FileDefinition getFileDefinitionForMarcDeletedIds(Date from, Date to) {
     validateDates(from, to);
     if (isNull(from) && isNull(to)) {

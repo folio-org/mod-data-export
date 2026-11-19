@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.folio.dataexp.TestMate;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.User;
+import org.folio.dataexp.service.RetryableUserClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @Mock private UserClient userClient;
+  @Mock private RetryableUserClient userClient;
 
   @InjectMocks private UserService userService;
 

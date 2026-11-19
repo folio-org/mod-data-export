@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.TestMate;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.JobProfileCollection;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -54,7 +53,7 @@ class MappingProfileServiceTest {
   @Mock private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Mock private MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
   @Mock private MappingProfileValidator mappingProfileValidator;
-  @Mock private UserClient userClient;
+  @Mock private RetryableUserClient userClient;
   @Mock private PermissionsValidator permissionsValidator;
   @Mock private JobProfileService jobProfileService;
 
