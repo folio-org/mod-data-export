@@ -61,10 +61,11 @@ class QueryServiceRetryTest {
         .thenThrow(new RuntimeException("persistent"));
 
     var uuidsSet = Set.of(UUID.randomUUID());
+    var id = UUID.randomUUID();
     var idList = List.of("id");
     assertThrows(
         RuntimeException.class,
-        () -> queryService.getEntities(uuidsSet, UUID.randomUUID(), idList));
+        () -> queryService.getEntities(uuidsSet, id, idList));
     verify(queryClient, times(3)).getContents(any(ContentsRequest.class));
   }
 }
