@@ -169,3 +169,6 @@ This value should be `true` if AWS S3 is used.
 | S3_IS_AWS                                      | false                      | Specify if AWS S3 is used as files storage |
 | EXPORT_TMP_STORAGE                             | -                          | Volume to store exports files              |
 | PLATFORM                                       | okapi                      | Specifies if okapi or eureka platform      |
+| FEIGN_CLIENT_RETRY_INITIAL_WAIT_TIME           | 2000                       | Specifies initial retry wait time          |
+| FEIGN_CLIENT_RETRY_MAX_WAIT_TIME               | 10000                      | Specifies max wait time for retry          |
+| FEIGN_CLIENT_RETRY_MAX_ATTEMPTS                | 3                          | Specifies maximum retry attempts           |
