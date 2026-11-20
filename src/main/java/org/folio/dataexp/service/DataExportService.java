@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -46,7 +45,7 @@ public class DataExportService {
   private final SlicerProcessor slicerProcessor;
   private final SingleFileProcessorAsync singleFileProcessorAsync;
   private final FolioExecutionContext folioExecutionContext;
-  private final UserClient userClient;
+  private final RetryableUserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final InstanceEntityRepository instanceEntityRepository;

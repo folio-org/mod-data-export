@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.folio.dataexp.TestMate;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
@@ -59,7 +58,7 @@ class JobProfileServiceTest {
   @Mock private JobExecutionService jobExecutionService;
   @Mock private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   @Mock private FolioExecutionContext folioExecutionContext;
-  @Mock private UserClient userClient;
+  @Mock private RetryableUserClient userClient;
   @Mock private PermissionsValidator permissionsValidator;
 
   @InjectMocks private JobProfileService jobProfileService;

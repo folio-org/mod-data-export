@@ -1,5 +1,11 @@
 ## v5.5.0 Unreleased
 
+## 11/20/2026 v5.4.8 Released
+### Technical tasks
+* [MDEXP-935](https://folio-org.atlassian.net/browse/MDEXP-935) Implement retries for failed requests
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.4.7...v5.4.8)
+
 ## 11/12/2026 v5.4.7 Released
 ### Technical tasks
 * [MDEXP-934](https://folio-org.atlassian.net/browse/MDEXP-934) Upgrade module to Spring Boot 4.1.1

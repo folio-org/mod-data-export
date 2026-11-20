@@ -38,6 +38,8 @@ import org.folio.dataexp.domain.dto.MaterialType;
 import org.folio.dataexp.domain.dto.ModeOfIssuance;
 import org.folio.dataexp.domain.dto.NatureOfContentTerm;
 import org.folio.processor.referencedata.JsonObjectWrapper;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import tools.jackson.core.type.TypeReference;
@@ -47,6 +49,14 @@ import tools.jackson.databind.ObjectMapper;
 @Service
 @Log4j2
 @RequiredArgsConstructor
+@Retryable(
+    maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+    backoff = @Backoff(
+        delayExpression = "${application.feign-client-retry.initial-wait-time}",
+        maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+        multiplier = 2.0
+    )
+)
 public class ReferenceDataService {
   private static final int REFERENCE_DATA_LIMIT = Integer.MAX_VALUE;
 

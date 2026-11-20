@@ -8,7 +8,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
@@ -35,7 +34,7 @@ public class MappingProfileService {
   private final FolioExecutionContext folioExecutionContext;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
-  private final UserClient userClient;
+  private final RetryableUserClient userClient;
   private final MappingProfileValidator mappingProfileValidator;
   private final PermissionsValidator permissionsValidator;
   private final JobProfileService jobProfileService;

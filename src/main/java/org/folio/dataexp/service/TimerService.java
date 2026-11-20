@@ -12,6 +12,8 @@ import org.folio.dataexp.domain.dto.RoutingEntry;
 import org.folio.dataexp.domain.dto.TimerDescriptor;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /** Service for managing and updating Okapi timer descriptors for clean-up operations. */
@@ -28,6 +30,14 @@ public class TimerService {
   private String cleanUpFilesDelay;
 
   /** Updates the clean-up files timer if the delay value has changed. */
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   public void updateCleanUpFilesTimerIfRequired() {
     var newValue = validateValueForTimer(cleanUpFilesDelay);
     if (isNotEmpty(newValue)) {

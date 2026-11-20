@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -44,6 +43,7 @@ import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.ConsortiumHoldingsService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.service.validators.PermissionsValidator;
@@ -73,7 +73,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
   private final RuleHandler ruleHandler;
   private final ReferenceDataProvider referenceDataProvider;
   private final ConsortiaService consortiaService;
-  private final ConsortiumSearchClient consortiumSearchClient;
+  private final ConsortiumHoldingsService consortiumHoldingsService;
   private final HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
@@ -329,7 +329,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
         availableTenants);
     ids.forEach(
         id -> {
-          var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
+          var curTenant = consortiumHoldingsService.getHoldingsById(id.toString()).getTenantId();
           if (nonNull(curTenant)) {
             if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
               if (permissionsValidator.checkInstanceViewPermissions(curTenant)) {
@@ -394,7 +394,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
     ids.forEach(
         id -> {
-          var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
+          var curTenant = consortiumHoldingsService.getHoldingsById(id.toString()).getTenantId();
           if (nonNull(curTenant)
               && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
             idsMap.put(id, curTenant);
@@ -413,7 +413,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
     holdings.forEach(
         hold -> {
           var curTenant =
-              consortiumSearchClient.getHoldingsById(hold.getId().toString()).getTenantId();
+              consortiumHoldingsService.getHoldingsById(hold.getId().toString()).getTenantId();
           if (nonNull(curTenant)
               && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
             idsMap.put(hold.getInstanceId(), curTenant);
